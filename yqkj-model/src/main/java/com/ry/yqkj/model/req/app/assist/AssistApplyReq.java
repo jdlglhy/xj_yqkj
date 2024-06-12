@@ -1,4 +1,4 @@
-package com.ry.yqkj.model.req.assist;
+package com.ry.yqkj.model.req.app.assist;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -33,7 +33,8 @@ public class AssistApplyReq implements Serializable {
     /**
      * 费用
      */
-    @ApiModelProperty(value = "费用", required = false, notes = "单位：元/小时")
+    @ApiModelProperty(value = "费用", required = false, example = "58、68、78、88、98", notes = "单位：元/小时")
+    @NotNull(message = "请设置费用")
     private BigDecimal price;
     /**
      * 身份证正面
@@ -52,7 +53,7 @@ public class AssistApplyReq implements Serializable {
      */
     @ApiModelProperty(value = "生活照（最多6张）", required = true)
     @NotBlank(message = "请上传生活照")
-    private String liftPhotos;
+    private String lifePhotos;
     /**
      * 头像
      */
@@ -96,6 +97,13 @@ public class AssistApplyReq implements Serializable {
     @ApiModelProperty(value = "所在区、县", required = true)
     @NotBlank(message = "请选择所在区、县")
     private String county;
+
+    /**
+     * 所在 街道、社区
+     */
+    @ApiModelProperty(value = "街道、社区", required = true)
+    @NotBlank(message = "请选择道、社区")
+    private String street;
 
     /**
      * 详细地址

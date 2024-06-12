@@ -1,14 +1,22 @@
 package com.ry.yqkj.system.service.impl;
 
+import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ry.yqkj.common.core.domain.model.WxAppUser;
+import com.ry.yqkj.common.core.page.PageResDomain;
 import com.ry.yqkj.common.exception.ServiceException;
 import com.ry.yqkj.common.utils.DozerUtil;
+import com.ry.yqkj.common.utils.SecurityUtils;
 import com.ry.yqkj.common.utils.WxUserUtils;
 import com.ry.yqkj.model.enums.ApproveEnum;
-import com.ry.yqkj.model.req.assist.AssistApplyReq;
-import com.ry.yqkj.model.resp.assist.AssistFormInfoResp;
+import com.ry.yqkj.model.req.app.assist.AssistApplyReq;
+import com.ry.yqkj.model.req.app.assist.AssistPageReq;
+import com.ry.yqkj.model.req.web.assist.AssistFormExamReq;
+import com.ry.yqkj.model.resp.app.assist.AssistDetailResp;
+import com.ry.yqkj.model.resp.app.assist.AssistFormInfoResp;
+import com.ry.yqkj.model.resp.app.assist.AssistInfoResp;
 import com.ry.yqkj.system.domain.AssistForm;
 import com.ry.yqkj.system.domain.Assistant;
 import com.ry.yqkj.system.domain.CliUser;
@@ -24,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author : lihy
@@ -48,7 +57,7 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
         CliUser cliUser = cliUserService.getById(wxAppUser.getUserId());
         //助教身份验证
         LambdaQueryWrapper<Assistant> assistWrap = new LambdaQueryWrapper<>();
-        assistWrap.eq(Assistant::getCliUserId, cliUser.getCity());
+        assistWrap.eq(Assistant::getCliUserId, cliUser.getId());
         Assistant assistant = assistantMapper.selectOne(assistWrap);
         if (assistant != null) {
             throw new ServiceException("不可申请！");
@@ -63,7 +72,7 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
         }
         //创建审批单
         AssistForm form = DozerUtil.map(assistApplyReq, AssistForm.class);
-        form.setCliUserId(cliUser.getWxUserId());
+        form.setCliUserId(cliUser.getId());
         form.setNickName(StringUtils.isBlank(assistApplyReq.getNickName()) ? cliUser.getNickName() :
                 assistApplyReq.getNickName());
         form.setCreateTime(new Date());
@@ -74,34 +83,67 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
     }
 
     @Override
-    public AssistFormInfoResp getLatestForm() {
-        WxAppUser wxAppUser = WxUserUtils.current();
+    public AssistFormInfoResp getLatestForm(Long userId) {
         LambdaQueryWrapper<AssistForm> formWrap = new LambdaQueryWrapper<>();
-        formWrap.eq(AssistForm::getCliUserId, wxAppUser.getUserId());
-        formWrap.eq(AssistForm::getApproveState, ApproveEnum.APPROVING.code);
-        formWrap.orderByDesc(AssistForm::getCreateBy);
-        AssistForm assistForm = assistFormMapper.selectOne(formWrap);
-        if (assistForm == null) {
+        formWrap.eq(AssistForm::getCliUserId, userId);
+        formWrap.orderByDesc(AssistForm::getId);
+        List<AssistForm> assistForm = assistFormMapper.selectList(formWrap);
+        if (CollectionUtil.isEmpty(assistForm)) {
             return new AssistFormInfoResp();
         }
-        return DozerUtil.map(assistForm, AssistFormInfoResp.class);
+        return DozerUtil.map(assistForm.get(0), AssistFormInfoResp.class);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void examine(Long formId, String approveState, String reason) {
-        AssistForm assistForm = assistFormMapper.selectById(formId);
+    public void examine(AssistFormExamReq req) {
+        if (!ApproveEnum.APPROVED.validate(req.getApproveState())) {
+            throw new ServiceException("error，传入的状态错误！");
+        }
+        AssistForm assistForm = assistFormMapper.selectById(req.getFormId());
         if (assistForm == null) {
             throw new ServiceException("error，未找到对应的数据！");
         }
         if (ObjectUtils.notEqual(ApproveEnum.APPROVING.code, assistForm.getApproveState())) {
             throw new ServiceException("error，状态异常！");
         }
+        assistForm.setApproveState(req.getApproveState());
+        assistForm.setApprovedTime(new Date());
+        assistForm.setModifyTime(new Date());
+        assistForm.setApprovalOpinions(req.getReason());
+        if (ApproveEnum.REFUSED.code.equals(req.getApproveState())) {
+            if (StringUtils.isBlank(assistForm.getApprovalOpinions())) {
+                throw new ServiceException("请填写审批意见！");
+            }
+            assistForm.setModifyBy(SecurityUtils.getUserId() + "_" + SecurityUtils.getUsername());
+            assistForm.setApprover(assistForm.getModifyBy());
+            assistFormMapper.updateById(assistForm);
+            return;
+        }
         //审批通过、创建助教
-        //if(){
+        Assistant assistant = DozerUtil.map(assistForm, Assistant.class);
+        assistant.setId(null);
+        assistant.setModifyBy("");
+        assistant.setModifyTime(null);
+        assistant.setCreateTime(new Date());
+        assistant.setCreateBy(assistForm.getApprover());
+        assistantMapper.insert(assistant);
+    }
 
+    @Override
+    public PageResDomain<AssistInfoResp> assistPage(AssistPageReq assistPageReq) {
+        Page<Assistant> page = new Page<>(assistPageReq.getCurrent(), assistPageReq.getPageSize());
+        LambdaQueryWrapper<Assistant> wrapper = new LambdaQueryWrapper<>();
+        page = assistantMapper.selectPage(page, wrapper);
+        return PageResDomain.parse(page, AssistInfoResp.class);
+    }
 
-        //}
-
+    @Override
+    public AssistDetailResp assistDetail(Long assistId) {
+        Assistant assistant = assistantMapper.selectById(assistId);
+        if (assistant == null) {
+            throw new ServiceException("信息不存在啦！");
+        }
+        return DozerUtil.map(assistant, AssistDetailResp.class);
     }
 }

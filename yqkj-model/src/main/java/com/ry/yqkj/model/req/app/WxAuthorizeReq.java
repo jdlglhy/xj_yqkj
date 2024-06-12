@@ -1,4 +1,4 @@
-package com.ry.yqkj.model.req;
+package com.ry.yqkj.model.req.app;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;

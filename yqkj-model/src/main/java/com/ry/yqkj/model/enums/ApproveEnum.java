@@ -1,5 +1,8 @@
 package com.ry.yqkj.model.enums;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * @author : lihy
  * @Description : 审批状态枚举
@@ -19,5 +22,10 @@ public enum ApproveEnum {
     public String code;
     public String message;
 
+
+    public boolean validate(String code){
+        Optional<ApproveEnum> opt = Arrays.stream(ApproveEnum.values()).filter(a->code.equals(a.code)).findAny();
+        return opt.isPresent();
+    }
 
 }

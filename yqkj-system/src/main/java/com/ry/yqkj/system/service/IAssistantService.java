@@ -1,8 +1,13 @@
 package com.ry.yqkj.system.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.ry.yqkj.model.req.assist.AssistApplyReq;
-import com.ry.yqkj.model.resp.assist.AssistFormInfoResp;
+import com.ry.yqkj.common.core.page.PageResDomain;
+import com.ry.yqkj.model.req.app.assist.AssistApplyReq;
+import com.ry.yqkj.model.req.app.assist.AssistPageReq;
+import com.ry.yqkj.model.req.web.assist.AssistFormExamReq;
+import com.ry.yqkj.model.resp.app.assist.AssistDetailResp;
+import com.ry.yqkj.model.resp.app.assist.AssistFormInfoResp;
+import com.ry.yqkj.model.resp.app.assist.AssistInfoResp;
 import com.ry.yqkj.system.domain.Assistant;
 
 /**
@@ -26,17 +31,30 @@ public interface IAssistantService extends IService<Assistant> {
      *
      * @return
      */
-    AssistFormInfoResp getLatestForm();
+    AssistFormInfoResp getLatestForm(Long cliUserId);
 
 
     /**
      * 审批
      *
-     * @param formId
-     * @param approveState
-     * @param reason
+     * @param req 审批请求参数
      */
-    void examine(Long formId,String approveState,String reason);
+    void examine(AssistFormExamReq req);
 
+    /**
+     * 助教分页
+     *
+     * @param assistPageReq
+     * @return
+     */
+    PageResDomain<AssistInfoResp> assistPage(AssistPageReq assistPageReq);
+
+    /**
+     * 助教详情
+     *
+     * @param assistId
+     * @return
+     */
+    AssistDetailResp assistDetail(Long assistId);
 
 }

@@ -1,4 +1,4 @@
-package com.ry.yqkj.model.req.cliuser;
+package com.ry.yqkj.model.req.app.cliuser;
 
 
 import io.swagger.annotations.ApiModelProperty;

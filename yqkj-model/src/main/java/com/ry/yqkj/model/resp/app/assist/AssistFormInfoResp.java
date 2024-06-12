@@ -1,4 +1,4 @@
-package com.ry.yqkj.model.resp.assist;
+package com.ry.yqkj.model.resp.app.assist;
 
 import lombok.Data;
 
@@ -40,7 +40,7 @@ public class AssistFormInfoResp implements Serializable {
     /**
      * 生活照
      */
-    private String liftPhotos;
+    private String lifePhotos;
     /**
      * 头像
      */
@@ -71,6 +71,10 @@ public class AssistFormInfoResp implements Serializable {
      * 所在 区、县
      */
     private String county;
+    /**
+     * 所在 街道、社区
+     */
+    private String street;
 
     /**
      * 详细地址
@@ -95,7 +99,7 @@ public class AssistFormInfoResp implements Serializable {
     /**
      * 审批人
      */
-    private String approveBy;
+    private String approver;
 
     /**
      * 审批意见

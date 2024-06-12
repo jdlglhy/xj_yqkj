@@ -4,9 +4,8 @@ import com.ry.yqkj.common.core.controller.BaseController;
 import com.ry.yqkj.common.core.domain.R;
 import com.ry.yqkj.common.core.domain.model.CodeSessionModel;
 import com.ry.yqkj.common.utils.DozerUtil;
-import com.ry.yqkj.model.req.WxAuthorizeReq;
+import com.ry.yqkj.model.req.app.WxAuthorizeReq;
 import com.ry.yqkj.model.resp.CodeSessionResp;
-import com.ry.yqkj.system.domain.dto.CodeSessionDTO;
 import com.ry.yqkj.system.service.IWxUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,7 +24,7 @@ import javax.annotation.Resource;
  */
 @RestController
 @RequestMapping("/wx_api")
-@Api("微信api")
+@Api("微信API")
 public class WxApiController extends BaseController {
 
     @Resource

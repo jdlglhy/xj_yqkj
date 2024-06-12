@@ -5,7 +5,7 @@ import com.ry.yqkj.common.core.domain.model.WxAppUser;
 import com.ry.yqkj.common.exception.ServiceException;
 import com.ry.yqkj.common.utils.DozerUtil;
 import com.ry.yqkj.common.utils.WxUserUtils;
-import com.ry.yqkj.model.req.cliuser.CliUserInfoSetReq;
+import com.ry.yqkj.model.req.app.cliuser.CliUserInfoSetReq;
 import com.ry.yqkj.system.domain.CliUser;
 import com.ry.yqkj.system.mapper.app.CliUserMapper;
 import com.ry.yqkj.system.service.ICliUserService;

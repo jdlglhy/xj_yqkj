@@ -51,7 +51,7 @@ public class AssistForm implements Serializable {
     /**
      * 生活照
      */
-    private String liftPhotos;
+    private String lifePhotos;
     /**
      * 头像
      */
@@ -84,6 +84,11 @@ public class AssistForm implements Serializable {
     private String county;
 
     /**
+     * 所在 街道、社区
+     */
+    private String street;
+
+    /**
      * 详细地址
      */
     private String address;
@@ -106,7 +111,7 @@ public class AssistForm implements Serializable {
     /**
      * 审批人
      */
-    private String approveBy;
+    private String approver;
 
     /**
      * 审批意见

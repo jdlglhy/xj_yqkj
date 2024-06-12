@@ -3,20 +3,30 @@ package com.ry.yqkj.controller.web.system.app;
 import com.ry.yqkj.common.core.controller.BaseController;
 import com.ry.yqkj.common.core.domain.R;
 import com.ry.yqkj.common.core.page.TableDataInfo;
+import com.ry.yqkj.model.req.web.assist.AssistFormExamReq;
+import com.ry.yqkj.system.service.IAssistantService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiModel;
+import io.swagger.annotations.Authorization;
 import org.apache.commons.compress.utils.Lists;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
 
 /**
  * @author : lihy
- * @Description : 助教管理Controller
+ * @Description : 后台-助教管理
  * @date : 2024/5/18 12:11 上午
  */
 @RestController
 @RequestMapping("/assist")
+@Api("后台-助教管理")
 public class AssistManagerController extends BaseController {
+
+    @Resource
+    private IAssistantService assistantService;
 
 
     /**
@@ -32,8 +42,9 @@ public class AssistManagerController extends BaseController {
      * 审批
      */
     @PreAuthorize("@ss.hasPermi('assist:form:examine')")
-    @GetMapping("/from/examine")
-    public R<Void> examine() {
+    @PostMapping("/from/examine")
+    public R<Void> examine(@RequestBody @Validated AssistFormExamReq req) {
+        assistantService.examine(req);
         return R.ok();
     }
 

@@ -2,7 +2,7 @@ package com.ry.yqkj.controller.app;
 
 import com.ry.yqkj.common.core.controller.WxBaseController;
 import com.ry.yqkj.common.core.domain.R;
-import com.ry.yqkj.model.req.cliuser.CliUserInfoSetReq;
+import com.ry.yqkj.model.req.app.cliuser.CliUserInfoSetReq;
 import com.ry.yqkj.system.service.ICliUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -19,7 +19,7 @@ import javax.annotation.Resource;
  * @date : 2024/5/18 12:11 上午
  */
 @RestController
-@Api("用户控制器")
+@Api("用户信息管理")
 public class CliUserController extends WxBaseController {
 
     @Resource
@@ -27,7 +27,7 @@ public class CliUserController extends WxBaseController {
 
     @PostMapping("/cli_user/set_simple_info")
     @ApiOperation("设置基本信息")
-    public R<Void> bind(@Validated @RequestBody CliUserInfoSetReq req) {
+    public R<Void> setSimpleInfo(@Validated @RequestBody CliUserInfoSetReq req) {
         cliUserService.setUserSimpleInfo(req);
         return R.ok();
     }

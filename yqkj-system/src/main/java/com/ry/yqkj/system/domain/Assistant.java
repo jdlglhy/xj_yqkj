@@ -44,7 +44,7 @@ public class Assistant implements Serializable {
     /**
      * 生活照
      */
-    private String liftPhotos;
+    private String lifePhotos;
     /**
      * 头像
      */
@@ -71,6 +71,16 @@ public class Assistant implements Serializable {
      * 所在 区、县
      */
     private String county;
+
+    /**
+     * 所在 街道、社区
+     */
+    private String street;
+
+    /**
+     * 状态
+     */
+    private String status;
 
     /**
      * 详细地址

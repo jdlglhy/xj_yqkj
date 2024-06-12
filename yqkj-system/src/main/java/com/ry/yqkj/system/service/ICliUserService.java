@@ -1,7 +1,7 @@
 package com.ry.yqkj.system.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.ry.yqkj.model.req.cliuser.CliUserInfoSetReq;
+import com.ry.yqkj.model.req.app.cliuser.CliUserInfoSetReq;
 import com.ry.yqkj.system.domain.CliUser;
 
 /**

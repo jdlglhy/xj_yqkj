@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.JSON;
 import com.ry.yqkj.common.constant.Constants;
 import com.ry.yqkj.common.constant.HttpStatus;
 import com.ry.yqkj.common.core.domain.R;
+import com.ry.yqkj.common.core.domain.model.CodeSessionModel;
 import com.ry.yqkj.common.core.redis.RedisCache;
 import com.ry.yqkj.common.utils.StringUtils;
 import com.ry.yqkj.system.domain.dto.CodeSessionDTO;
@@ -40,7 +41,7 @@ public class WxAppletInterceptor implements HandlerInterceptor {
             returnErrorResponse(response, result);
             return false;
         } else {
-            CodeSessionDTO codeSession = redisCache.getCacheObject(header);
+            CodeSessionModel codeSession = redisCache.getCacheObject(header);
             if (codeSession == null) {
                 //未授权
                 R result = R.fail(HttpStatus.UNAUTHORIZED, "unauthorized");

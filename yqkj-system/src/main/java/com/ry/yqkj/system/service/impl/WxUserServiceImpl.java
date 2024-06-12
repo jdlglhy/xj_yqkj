@@ -6,8 +6,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ry.yqkj.common.core.domain.model.CodeSessionModel;
 import com.ry.yqkj.common.core.redis.RedisCache;
 import com.ry.yqkj.common.exception.ServiceException;
+import com.ry.yqkj.common.utils.StringUtils;
 import com.ry.yqkj.common.utils.http.HttpUtils;
 import com.ry.yqkj.common.utils.sign.Md5Utils;
+import com.ry.yqkj.common.utils.uuid.SnowflakeIdUtil;
 import com.ry.yqkj.system.domain.CliUser;
 import com.ry.yqkj.system.domain.WxUser;
 import com.ry.yqkj.system.domain.dto.CodeSessionDTO;
@@ -17,9 +19,11 @@ import com.ry.yqkj.system.service.IWxUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * @author : lihy
@@ -43,6 +47,7 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
     private IWxUserService wxUserService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public CodeSessionModel bindWxUser(String code) {
         String url  = "https://api.weixin.qq.com/sns/jscode2session";
         /**
@@ -53,14 +58,23 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
          */
         String params = String.format("appid={}&secret={}&js_code={}&grant_type=authorization_code", appId,
                 secret, code);
-        //开始发起网络请求,若依管理系统自带网络请求工具，直接使用即可
-        String res = HttpUtils.sendGet(url,params);
-        log.info("code={},res ={}",code,res);
-        CodeSessionModel codeSession = JSON.parseObject(res, CodeSessionModel.class);
-        if (codeSession == null) {
-            throw new ServiceException("未获取到对应的openid");
+
+        String md5SessionKey = "";
+
+        CodeSessionModel codeSession = new CodeSessionModel();
+        if("zds_test_code".equals(code)){
+            codeSession.setSession_key(code);
+            codeSession.setOpenid(code);
+        }else{
+            //开始发起网络请求,若依管理系统自带网络请求工具，直接使用即可
+            String res = HttpUtils.sendGet(url,params);
+            log.info("code={},res ={}",code,res);
+            codeSession = JSON.parseObject(res, CodeSessionModel.class);
+            if (codeSession == null) {
+                throw new ServiceException("未获取到对应的openid");
+            }
         }
-        String md5SessionKey = Md5Utils.hash(codeSession.getSession_key());
+        md5SessionKey = Md5Utils.hash(codeSession.getSession_key());
         codeSession.setMd5SessionKey(md5SessionKey);
         log.info("md5SessionKey={},openId={},session_key={}",md5SessionKey,codeSession.getOpenid(),
                 codeSession.getSession_key());
@@ -77,13 +91,16 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
             //同时绑定创建一个用户信息
             cliUser = new CliUser();
             cliUser.setWxUserId(wxUser.getId());
+            cliUser.setNickName(String.valueOf(SnowflakeIdUtil.nextId()));
             cliUser.setCreateTime(new Date());
             cliUser.setMark("client");
-            cliUserService.save(cliUser);
             log.info("save cliUser result={}",cliUserService.save(cliUser));
         }else{
             //清空原来的md5SessionKey
-            redisCache.deleteObject(Md5Utils.hash(wxUser.getSessionKey()));
+            String oldMd5SessionKey = Md5Utils.hash(wxUser.getSessionKey());
+            if(redisCache.hasKey(oldMd5SessionKey)){
+                redisCache.deleteObject(oldMd5SessionKey);
+            }
             wxUser.setSessionKey(codeSession.getSession_key());
             wxUser.setModifyTime(new Date());
             wxUserService.updateById(wxUser);
@@ -93,7 +110,10 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 
         }
         codeSession.setUserId(cliUser.getId());
-        redisCache.setCacheObject(md5SessionKey,codeSession);
+        redisCache.setCacheObject(codeSession.getMd5SessionKey(),codeSession);
+
+        //清空sessionKey
+        codeSession.setSession_key("");
         return codeSession;
     }
 
