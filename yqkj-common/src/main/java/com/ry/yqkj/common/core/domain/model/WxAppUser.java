@@ -19,6 +19,10 @@ public class WxAppUser implements Serializable {
      * 用户ID
      */
     private Long userId;
+    /**
+     * 助教ID
+     */
+    private Long assistId;
 
     /**
      * 微信openId

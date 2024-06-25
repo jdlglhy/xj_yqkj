@@ -1,6 +1,8 @@
 package com.ry.yqkj.model.req.app.assist;
 
 import com.ry.yqkj.common.core.page.PageReqDomain;
+import com.ry.yqkj.common.utils.mp.SearchType;
+import com.ry.yqkj.common.utils.mp.ano.Search;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -17,18 +19,34 @@ public class AssistPageReq extends PageReqDomain {
      * 昵称
      */
     @ApiModelProperty(value = "宝贝昵称", required = false)
+    @Search(type = SearchType.LIKE)
     private String nickName;
+    /**
+     * 省
+     */
+    @ApiModelProperty(value = "省", required = false)
+    @Search
+    private String province;
     /**
      * 市、区
      */
     @ApiModelProperty(value = "市", required = false)
+    @Search
     private String city;
 
     /**
      * 区、县
      */
     @ApiModelProperty(value = "区、县", required = false)
+    @Search
     private String county;
+
+    /**
+     * 性别
+     */
+    @ApiModelProperty(value = "性别", required = false)
+    @Search
+    private Integer sex;
     /**
      * 价格
      */

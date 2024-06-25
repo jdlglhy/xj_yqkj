@@ -2,13 +2,21 @@ package com.ry.yqkj.controller.web.system.app;
 
 import com.ry.yqkj.common.core.controller.BaseController;
 import com.ry.yqkj.common.core.domain.R;
+import com.ry.yqkj.common.core.page.PageResDomain;
 import com.ry.yqkj.common.core.page.TableDataInfo;
+import com.ry.yqkj.common.exception.ServiceException;
+import com.ry.yqkj.common.utils.DozerUtil;
 import com.ry.yqkj.model.req.web.assist.AssistFormExamReq;
+import com.ry.yqkj.model.req.web.assist.AssistFormPageReq;
+import com.ry.yqkj.model.resp.app.assist.AssistFormInfoResp;
+import com.ry.yqkj.system.domain.AssistForm;
+import com.ry.yqkj.system.mapper.app.AssistFormMapper;
 import com.ry.yqkj.system.service.IAssistantService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.Authorization;
 import org.apache.commons.compress.utils.Lists;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -27,15 +35,17 @@ public class AssistManagerController extends BaseController {
 
     @Resource
     private IAssistantService assistantService;
+    @Autowired
+    private AssistFormMapper assistFormMapper;
 
 
     /**
      * 助教申请列表
      */
     @PreAuthorize("@ss.hasPermi('assist:form:list')")
-    @GetMapping("/form/page")
-    public TableDataInfo applyList() {
-        return getDataTable(Lists.newArrayList());
+    @PostMapping("/form/page")
+    public R<PageResDomain<AssistFormInfoResp>> applyList(@Validated @RequestBody AssistFormPageReq assistFormPageReq) {
+        return R.ok(assistantService.fromPage(assistFormPageReq));
     }
 
     /**
@@ -52,9 +62,13 @@ public class AssistManagerController extends BaseController {
      * 申请详情
      */
     @PreAuthorize("@ss.hasPermi('assist:form:info')")
-    @GetMapping("/form/info")
-    public R<Void> applyInfo() {
-        return R.ok();
+    @GetMapping("/form/info/{formId}")
+    public R<AssistFormInfoResp> applyInfo(@PathVariable("formId") Long formId) {
+        AssistForm assistForm = assistFormMapper.selectById(formId);
+        if(assistForm == null){
+            throw new ServiceException("未找到对应表单！");
+        }
+        return R.ok(DozerUtil.map(assistForm,AssistFormInfoResp.class));
     }
 
 }

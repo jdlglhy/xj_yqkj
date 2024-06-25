@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.ry.yqkj.common.core.page.PageResDomain;
 import com.ry.yqkj.model.req.app.assist.AssistApplyReq;
 import com.ry.yqkj.model.req.app.assist.AssistPageReq;
+import com.ry.yqkj.model.req.app.assist.AssistRecPageReq;
 import com.ry.yqkj.model.req.web.assist.AssistFormExamReq;
+import com.ry.yqkj.model.req.web.assist.AssistFormPageReq;
 import com.ry.yqkj.model.resp.app.assist.AssistDetailResp;
 import com.ry.yqkj.model.resp.app.assist.AssistFormInfoResp;
 import com.ry.yqkj.model.resp.app.assist.AssistInfoResp;
@@ -35,6 +37,13 @@ public interface IAssistantService extends IService<Assistant> {
 
 
     /**
+     * 申请单列表
+     *
+     * @return
+     */
+    PageResDomain<AssistFormInfoResp> fromPage(AssistFormPageReq assistFormPageReq);
+
+    /**
      * 审批
      *
      * @param req 审批请求参数
@@ -48,6 +57,15 @@ public interface IAssistantService extends IService<Assistant> {
      * @return
      */
     PageResDomain<AssistInfoResp> assistPage(AssistPageReq assistPageReq);
+
+    /**
+     * 推荐助教分页
+     * （暂时下单地址做精确的匹配）
+     *
+     * @param assistRecPageReq
+     * @return
+     */
+    PageResDomain<AssistInfoResp> assistRecPage(AssistRecPageReq assistRecPageReq);
 
     /**
      * 助教详情

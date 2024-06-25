@@ -2,6 +2,7 @@ package com.ry.yqkj.system.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ry.yqkj.model.req.app.cliuser.CliUserInfoSetReq;
+import com.ry.yqkj.model.resp.app.cliuser.CliUserInfoResp;
 import com.ry.yqkj.system.domain.CliUser;
 
 /**
@@ -17,4 +18,9 @@ public interface ICliUserService extends IService<CliUser> {
      * @param cliUserInfoSetReq
      */
     void setUserSimpleInfo(CliUserInfoSetReq cliUserInfoSetReq);
+
+    /**
+     * 获取当前用户信息
+     */
+    CliUserInfoResp currentUserInfo();
 }

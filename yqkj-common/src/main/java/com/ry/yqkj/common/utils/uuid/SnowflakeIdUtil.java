@@ -44,4 +44,8 @@ public class SnowflakeIdUtil {
         workerId = Integer.parseInt(ipSplit[3]);
         log.info("IdGeneratorSnowflake initWorkerId host:{}, workerId:{}", host, workerId);
     }
+
+    public static void main(String[] args) {
+        System.out.println(SnowflakeIdUtil.nextId());
+    }
 }

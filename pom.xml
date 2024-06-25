@@ -209,6 +209,7 @@
         <module>yqkj-generator</module>
         <module>yqkj-common</module>
         <module>yqkj-model</module>
+        <module>yqkj-s3</module>
     </modules>
     <packaging>pom</packaging>
 

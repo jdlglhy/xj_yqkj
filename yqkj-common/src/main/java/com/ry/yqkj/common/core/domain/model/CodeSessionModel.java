@@ -24,6 +24,11 @@ public class CodeSessionModel implements Serializable {
     private Long userId;
 
     /**
+     * assistId 不为空 标识当前用户是助教
+     */
+    private Long assistId;
+
+    /**
      * 微信session_key
      */
     private String session_key;

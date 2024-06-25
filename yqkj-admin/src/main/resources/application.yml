@@ -141,3 +141,30 @@ wx:
   app:
     appId: xxxxx
     secret: xxxxxxxx
+  test:
+    #配置本地测试的授权码
+    auCodes: zds_test_code,lhy_test_code
+#微信小程序支付相关 https://blog.csdn.net/ygz970518/article/details/135926243
+wechatpay:
+  #应用编号 正式号id
+  appId: XXXXXX
+  # 小程序密钥
+  appSecret: XXXXXX
+  #商户号
+  mchId: XXXXXX
+  # APIv3密钥（在微信支付平台中自己设置）
+  apiV3Key: XXXXXX
+
+  # 支付成功后微信官方会自动调用我们设定的接口：域名/接口名
+  # 支付通知回调, 本地测试内网穿透地址（仅用于做本地测试）
+  #  notifyUrl: http://84cd47.natappfree.cc/wechatPay/notify-pay
+  # 支付通知回调, 线上域名地址（正常使用服务器配置的域名即可），小程序上线后前后端访问数据时只能用https不能用http，因此还需要为域名配置SSL证书，可根据使用的服务器查看如何配置
+  notifyUrl: XXXXXX
+
+  # 密钥路径,resources根目录下
+  keyPemPath: src/main/resources/wechatPay/apiclient_key.pem
+  certPath: src/main/resources/wechatPay/apiclient_cert.pem
+  certP12Path: src/main/resources/wechatPay/apiclient_cert.p12
+  # 商户证书序列号（可在微信支付平台商户信息中查看）
+  serialNo: XXXXXXXXXX
+

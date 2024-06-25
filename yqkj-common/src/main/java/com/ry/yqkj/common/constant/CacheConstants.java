@@ -2,15 +2,24 @@ package com.ry.yqkj.common.constant;
 
 /**
  * 缓存的key 常量
- * 
+ *
  * @author ry.yqkj
  */
-public class CacheConstants
-{
+public class CacheConstants {
     /**
      * 登录用户 redis key
      */
     public static final String LOGIN_TOKEN_KEY = "login_tokens:";
+
+    /**
+     * sessionKey 前缀
+     */
+    public static String SESSION_KEY_PRE = "SESSION_KEY:";
+
+    /**
+     * sessionKey 缓存有效期 30天
+     */
+    public static Integer SESSION_KEY_EXPIRE_DAYS = 30;
 
     /**
      * 验证码 redis key

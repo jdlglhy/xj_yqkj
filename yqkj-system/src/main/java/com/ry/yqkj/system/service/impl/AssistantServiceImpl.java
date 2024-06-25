@@ -2,6 +2,7 @@ package com.ry.yqkj.system.service.impl;
 
 import cn.hutool.core.collection.CollectionUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ry.yqkj.common.core.domain.model.WxAppUser;
@@ -10,10 +11,14 @@ import com.ry.yqkj.common.exception.ServiceException;
 import com.ry.yqkj.common.utils.DozerUtil;
 import com.ry.yqkj.common.utils.SecurityUtils;
 import com.ry.yqkj.common.utils.WxUserUtils;
+import com.ry.yqkj.common.utils.mp.search.SearchTool;
+import com.ry.yqkj.common.utils.uuid.SnowflakeIdUtil;
 import com.ry.yqkj.model.enums.ApproveEnum;
 import com.ry.yqkj.model.req.app.assist.AssistApplyReq;
 import com.ry.yqkj.model.req.app.assist.AssistPageReq;
+import com.ry.yqkj.model.req.app.assist.AssistRecPageReq;
 import com.ry.yqkj.model.req.web.assist.AssistFormExamReq;
+import com.ry.yqkj.model.req.web.assist.AssistFormPageReq;
 import com.ry.yqkj.model.resp.app.assist.AssistDetailResp;
 import com.ry.yqkj.model.resp.app.assist.AssistFormInfoResp;
 import com.ry.yqkj.model.resp.app.assist.AssistInfoResp;
@@ -95,6 +100,15 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
     }
 
     @Override
+    public PageResDomain<AssistFormInfoResp> fromPage(AssistFormPageReq assistFormPageReq) {
+        Page<AssistForm> page = new Page<>(assistFormPageReq.getCurrent(), assistFormPageReq.getPageSize());
+        QueryWrapper<AssistForm> queryWrapper = SearchTool.invoke(assistFormPageReq);
+        queryWrapper.lambda().orderByDesc(AssistForm::getCreateTime);
+        page = assistFormMapper.selectPage(page, queryWrapper);
+        return PageResDomain.parse(page, AssistFormInfoResp.class);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public void examine(AssistFormExamReq req) {
         if (!ApproveEnum.APPROVED.validate(req.getApproveState())) {
@@ -111,18 +125,19 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
         assistForm.setApprovedTime(new Date());
         assistForm.setModifyTime(new Date());
         assistForm.setApprovalOpinions(req.getReason());
+        assistForm.setModifyBy(SecurityUtils.getUserId() + "_" + SecurityUtils.getUsername());
+        assistForm.setApprover(assistForm.getModifyBy());
         if (ApproveEnum.REFUSED.code.equals(req.getApproveState())) {
             if (StringUtils.isBlank(assistForm.getApprovalOpinions())) {
                 throw new ServiceException("请填写审批意见！");
             }
-            assistForm.setModifyBy(SecurityUtils.getUserId() + "_" + SecurityUtils.getUsername());
-            assistForm.setApprover(assistForm.getModifyBy());
             assistFormMapper.updateById(assistForm);
             return;
         }
+        assistFormMapper.updateById(assistForm);
         //审批通过、创建助教
         Assistant assistant = DozerUtil.map(assistForm, Assistant.class);
-        assistant.setId(null);
+        assistant.setId(SnowflakeIdUtil.nextId());
         assistant.setModifyBy("");
         assistant.setModifyTime(null);
         assistant.setCreateTime(new Date());
@@ -133,9 +148,15 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
     @Override
     public PageResDomain<AssistInfoResp> assistPage(AssistPageReq assistPageReq) {
         Page<Assistant> page = new Page<>(assistPageReq.getCurrent(), assistPageReq.getPageSize());
-        LambdaQueryWrapper<Assistant> wrapper = new LambdaQueryWrapper<>();
-        page = assistantMapper.selectPage(page, wrapper);
+        QueryWrapper<Assistant> queryWrapper = SearchTool.invoke(assistPageReq);
+        page = assistantMapper.selectPage(page, queryWrapper);
         return PageResDomain.parse(page, AssistInfoResp.class);
+    }
+
+    @Override
+    public PageResDomain<AssistInfoResp> assistRecPage(AssistRecPageReq assistRecPageReq) {
+        AssistPageReq assistPageReq = DozerUtil.map(assistRecPageReq, AssistPageReq.class);
+        return this.assistPage(assistPageReq);
     }
 
     @Override

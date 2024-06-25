@@ -1,5 +1,6 @@
 package com.ry.yqkj.common.utils;
 
+import com.ry.yqkj.common.constant.CacheConstants;
 import com.ry.yqkj.common.constant.Constants;
 import com.ry.yqkj.common.core.domain.model.CodeSessionModel;
 import com.ry.yqkj.common.core.domain.model.WxAppUser;
@@ -24,13 +25,14 @@ public class WxUserUtils {
             return WxAppUser.builder().build();
         }
         RedisCache redisCache = SpringUtils.getBean(RedisCache.class);
-        CodeSessionModel session = redisCache.getCacheObject(md5SessionKey);
+        CodeSessionModel session = redisCache.getCacheObject(CacheConstants.SESSION_KEY_PRE + md5SessionKey);
         if (session == null) {
             return WxAppUser.builder().build();
         }
         return WxAppUser.builder()
                 .userId(session.getUserId())
                 .openId(session.getOpenid())
+                .assistId(session.getAssistId())
                 .build();
     }
 }

@@ -28,6 +28,10 @@ public class WxUser implements Serializable {
      */
     private String openId;
     /**
+     * 用户ID
+     */
+    private Long cliUserId;
+    /**
      * sessionKey
      */
     private String sessionKey;

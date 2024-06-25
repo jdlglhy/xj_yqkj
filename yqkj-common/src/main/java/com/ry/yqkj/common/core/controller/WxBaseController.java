@@ -1,5 +1,6 @@
 package com.ry.yqkj.common.core.controller;
 
+import com.ry.yqkj.common.constant.CacheConstants;
 import com.ry.yqkj.common.constant.Constants;
 import com.ry.yqkj.common.core.domain.model.CodeSessionModel;
 import com.ry.yqkj.common.core.domain.model.WxAppUser;
@@ -34,7 +35,7 @@ public class WxBaseController {
         if (StringUtils.isBlank(md5SessionKey)) {
             return WxAppUser.builder().build();
         }
-        CodeSessionModel session = redisCache.getCacheObject(md5SessionKey);
+        CodeSessionModel session = redisCache.getCacheObject(CacheConstants.SESSION_KEY_PRE + md5SessionKey);
         if (session == null) {
             return WxAppUser.builder().build();
         }

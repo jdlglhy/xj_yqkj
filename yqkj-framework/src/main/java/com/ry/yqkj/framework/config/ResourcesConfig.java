@@ -25,7 +25,7 @@ import javax.annotation.Resource;
  */
 @Configuration
 public class ResourcesConfig implements WebMvcConfigurer {
-    @Autowired
+    @Resource
     private RepeatSubmitInterceptor repeatSubmitInterceptor;
     @Resource
     private WxAppletInterceptor wxAppletInterceptor;

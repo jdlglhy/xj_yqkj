@@ -6,6 +6,7 @@ import com.ry.yqkj.common.exception.ServiceException;
 import com.ry.yqkj.common.utils.DozerUtil;
 import com.ry.yqkj.common.utils.WxUserUtils;
 import com.ry.yqkj.model.req.app.cliuser.CliUserInfoSetReq;
+import com.ry.yqkj.model.resp.app.cliuser.CliUserInfoResp;
 import com.ry.yqkj.system.domain.CliUser;
 import com.ry.yqkj.system.mapper.app.CliUserMapper;
 import com.ry.yqkj.system.service.ICliUserService;
@@ -37,5 +38,10 @@ public class CliUserServiceImpl extends ServiceImpl<CliUserMapper, CliUser> impl
         DozerUtil.map(cliUserInfoSetReq, cliUser);
         cliUser.setModifyTime(new Date());
         cliUserMapper.updateById(cliUser);
+    }
+
+    @Override
+    public CliUserInfoResp currentUserInfo() {
+        return null;
     }
 }
