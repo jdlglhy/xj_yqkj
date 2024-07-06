@@ -153,6 +153,13 @@
                 <version>${ry.yqkj.version}</version>
             </dependency>
 
+            <!-- 定时任务-->
+            <dependency>
+                <groupId>com.ry.yqkj</groupId>
+                <artifactId>yqkj-s3</artifactId>
+                <version>${ry.yqkj.version}</version>
+            </dependency>
+
             <!-- 核心模块-->
             <dependency>
                 <groupId>com.ry.yqkj</groupId>

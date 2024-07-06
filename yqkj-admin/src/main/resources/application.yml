@@ -139,8 +139,8 @@ xss:
 #微信小程序授权信息
 wx:
   app:
-    appId: xxxxx
-    secret: xxxxxxxx
+    appId: wxf753d4d1f7dc8bfd
+    secret: 76d117868cd94239defe3a2d814ecf9c
   test:
     #配置本地测试的授权码
     auCodes: zds_test_code,lhy_test_code
@@ -168,3 +168,8 @@ wechatpay:
   # 商户证书序列号（可在微信支付平台商户信息中查看）
   serialNo: XXXXXXXXXX
 
+s3:
+  endpoint: qttz.oss-cn-hangzhou.aliyuncs.com
+  bucket-name: qttz
+  access-key: LTAI5tPfdZ1QjSQTgZqMqupg
+  secret-key: ifJZy64pKej1xbWm2MNxyr2iGNRZUv

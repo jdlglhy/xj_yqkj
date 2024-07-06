@@ -1,4 +1,4 @@
-package com.ry.yqkj.s3.api.impl;
+package com.ry.yqkj.framework.web.service;
 
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.StrUtil;
@@ -8,13 +8,15 @@ import com.amazonaws.services.s3.model.Bucket;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.util.StringUtils;
-import com.ry.yqkj.s3.api.TemplateApi;
-import com.ry.yqkj.s3.config.ConfigProperties;
-import com.ry.yqkj.s3.model.AttachmentVO;
+import com.ry.yqkj.framework.config.s3.S3ConfigProperties;
+import com.ry.yqkj.framework.web.api.TemplateApi;
+import com.ry.yqkj.model.common.vo.AttachmentVO;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.IOUtils;
+import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
@@ -24,16 +26,14 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 @Slf4j
+@Service
 public class S3TemplateImpl implements TemplateApi {
-    protected final AmazonS3 amazonS3;
 
-    protected final ConfigProperties properties;
 
-    public S3TemplateImpl(AmazonS3 amazonS3, ConfigProperties properties) {
+    @Resource
+    private AmazonS3 amazonS3;
 
-        this.amazonS3 = amazonS3;
-        this.properties = properties;
-    }
+    private S3ConfigProperties properties;
 
     @Override
     public List<Bucket> getAllBuckets() {

@@ -1,4 +1,4 @@
-package com.ry.yqkj.s3.model;
+package com.ry.yqkj.model.common.vo;
 
 import lombok.Builder;
 import lombok.Data;

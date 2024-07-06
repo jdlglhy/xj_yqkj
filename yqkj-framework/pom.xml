@@ -35,6 +35,13 @@
             <artifactId>druid-spring-boot-starter</artifactId>
         </dependency>
 
+
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>1.12.423</version>
+        </dependency>
+
         <!-- 验证码 -->
         <dependency>
             <groupId>pro.fessional</groupId>
@@ -63,6 +70,11 @@
         <dependency>
             <groupId>com.ry.yqkj</groupId>
             <artifactId>yqkj-system</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.ry.yqkj</groupId>
+            <artifactId>yqkj-model</artifactId>
         </dependency>
 
     </dependencies>

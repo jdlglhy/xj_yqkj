@@ -1,2 +1,0 @@
-org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.ry.yqkj.s3.config.OSSAutoConfiguration

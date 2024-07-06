@@ -1,6 +1,7 @@
-package com.ry.yqkj.s3.config;
+package com.ry.yqkj.framework.config.s3;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
 /*
  * since: 2024/5/15 10:36
@@ -8,8 +9,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * description: s3 配置信息即 oss配置信息
  */
 @Data
+@Configuration
 @ConfigurationProperties(prefix = "s3")
-public class ConfigProperties {
+public class S3ConfigProperties {
     /**
      * 对象存储服务的URL
      */

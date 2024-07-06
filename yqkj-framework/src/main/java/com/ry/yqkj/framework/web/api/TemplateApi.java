@@ -1,7 +1,7 @@
-package com.ry.yqkj.s3.api;
+package com.ry.yqkj.framework.web.api;
 
 import com.amazonaws.services.s3.model.Bucket;
-import com.ry.yqkj.s3.model.AttachmentVO;
+import com.ry.yqkj.model.common.vo.AttachmentVO;
 
 import java.io.InputStream;
 import java.net.URL;
