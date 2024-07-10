@@ -5,6 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author : lihy
@@ -40,7 +41,7 @@ public class AssistFormInfoResp implements Serializable {
     /**
      * 生活照
      */
-    private String lifePhotos;
+    private List<String> lifePhotos;
     /**
      * 头像
      */

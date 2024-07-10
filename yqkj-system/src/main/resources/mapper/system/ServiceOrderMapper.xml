@@ -13,6 +13,7 @@
                so.assist_id       as assistId,
                aa.nick_name       as assistNickName,
                aa.avatar          as assistAvatar,
+               aa.gender          as assistGender,
                so.reserve_dur     as reserveDur,
                so.total_amount    as totalAmount,
                so.reserve_time    as reserveTime,

@@ -44,6 +44,11 @@ public class OrderSimpleResp implements Serializable {
      */
     private String assistAvatar;
     /**
+     * 助教性别
+     */
+    private Integer assistGender;
+
+    /**
      * 预约时长 单位 H（小时）
      */
     private BigDecimal reserveDur;

@@ -314,6 +314,11 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         if (page.getTotal() <= 0) {
             return new PageResDomain<>(Lists.newArrayList(), page.getTotal(), page.getSize(), page.getCurrent());
         }
+
+
+
+
+
         return PageResDomain.parse(page, OrderSimpleResp.class);
     }
 

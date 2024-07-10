@@ -5,10 +5,12 @@ import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author : lihy
@@ -52,8 +54,8 @@ public class AssistApplyReq implements Serializable {
      * 生活照
      */
     @ApiModelProperty(value = "生活照（最多6张）", required = true)
-    @NotBlank(message = "请上传生活照")
-    private String lifePhotos;
+    @NotEmpty(message = "请上传生活照")
+    private List<String> lifePhotos;
     /**
      * 头像
      */

@@ -51,7 +51,7 @@ public class AssistForm implements Serializable {
     /**
      * 生活照
      */
-    private String lifePhotos;
+    private String lifePhoto;
     /**
      * 头像
      */

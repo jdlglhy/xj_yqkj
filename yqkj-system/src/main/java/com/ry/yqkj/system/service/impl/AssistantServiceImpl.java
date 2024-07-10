@@ -36,6 +36,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -84,6 +85,7 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
         form.setCreateBy(cliUser.getId() + "_" + cliUser.getNickName());
         //审批状态
         form.setApproveState(ApproveEnum.APPROVING.code);
+        form.setLifePhoto(StringUtils.join(assistApplyReq.getLifePhotos(),";"));
         assistFormMapper.insert(form);
     }
 
@@ -95,6 +97,10 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
         List<AssistForm> assistForm = assistFormMapper.selectList(formWrap);
         if (CollectionUtil.isEmpty(assistForm)) {
             return new AssistFormInfoResp();
+        }
+        AssistFormInfoResp assistFormInfoResp = DozerUtil.map(assistForm.get(0), AssistFormInfoResp.class);
+        if(StringUtils.isNoneBlank(assistForm.get(0).getLifePhoto())){
+            assistFormInfoResp.setLifePhotos(Arrays.asList(StringUtils.split(assistForm.get(0).getLifePhoto(),";")));
         }
         return DozerUtil.map(assistForm.get(0), AssistFormInfoResp.class);
     }
@@ -165,6 +171,10 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
         if (assistant == null) {
             throw new ServiceException("信息不存在啦！");
         }
-        return DozerUtil.map(assistant, AssistDetailResp.class);
+        AssistDetailResp assistDetailResp = DozerUtil.map(assistant, AssistDetailResp.class);
+        if (StringUtils.isNoneBlank(assistant.getLifePhoto())) {
+            assistDetailResp.setLifePhotos(Arrays.asList(StringUtils.split(assistant.getLifePhoto(), ";")));
+        }
+        return assistDetailResp;
     }
 }
