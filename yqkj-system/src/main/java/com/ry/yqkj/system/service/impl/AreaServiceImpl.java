@@ -42,4 +42,16 @@ public class AreaServiceImpl extends ServiceImpl<AreaMapper, Area> implements IA
         }
         return DozerUtil.mapList(areaList, AreaVO.class);
     }
+
+    @Override
+    public List<AreaVO> getProvinceList() {
+        LambdaQueryWrapper<Area> wrapper = new LambdaQueryWrapper<Area>();
+        wrapper.eq(Area::getLevel, 0);
+        List<Area> areaList = this.baseMapper.selectList(wrapper);
+        if (CollectionUtil.isEmpty(areaList)) {
+            return Lists.newArrayList();
+        }
+        return DozerUtil.mapList(areaList, AreaVO.class);
+    }
+
 }

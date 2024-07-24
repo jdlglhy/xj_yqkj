@@ -5,7 +5,6 @@ import com.ry.yqkj.common.utils.mp.SearchType;
 import com.ry.yqkj.common.utils.mp.ano.Search;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -34,13 +33,18 @@ public class OrderPageReq extends PageReqDomain {
     private Long assistId;
 
     /**
-     * 订单状态 订单状态 state  已下单（ordered）、已取消（canceled）、已支付/待服务（paid）、服务中（servicing）、已完成（done）
+     * 订单状态 订单状态 state  已下单（order）、已取消（canceled）、已支付/待服务（paid）、服务中（servicing）、已完成（done）
      */
-    @Search(type = SearchType.IN,tableAlias = "so")
+    @Search(type = SearchType.IN, tableAlias = "so",field = "status")
     private List<String> statusList;
     /**
-     * 邀约状态（W = 已邀约  A= 已接单 R = 拒绝（取消订单） ）
+     * 邀约状态 invited = 已邀约、received=已接单、refused=已拒绝
      */
-    @Search(type = SearchType.IN,tableAlias = "so")
+    @Search(type = SearchType.IN, tableAlias = "so")
     private String inviteStatus;
+    /**
+     * 评价状态 ： N = 未评价（默认） Y=已评价
+     */
+    @Search(type = SearchType.EQ, tableAlias = "so")
+    private String evalStatus;
 }

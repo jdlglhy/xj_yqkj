@@ -24,6 +24,7 @@
                so.lng,
                so.lat,
                so.refuse_reason   as refuseReason,
+               so.remark          as remark,
                so.create_time     as createTime,
                so.create_by       as createBy
         from service_order so

@@ -118,10 +118,11 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
     @Transactional(rollbackFor = Exception.class)
     public void cancel(OrderCancelReq orderCancelReq) {
         ServiceOrder serviceOrder = this.getCurrentUserServiceOrder(orderCancelReq.getOrderNo());
-        if (ObjectUtil.equal(serviceOrder.getStatus(), OrderStatusEnum.ORDER.code)) {
+        if (ObjectUtil.notEqual(serviceOrder.getStatus(), OrderStatusEnum.ORDER.code)) {
             throw new ServiceException("状态异常，不允许操作！");
         }
         serviceOrder.setStatus(OrderStatusEnum.CANCELED.code);
+        serviceOrder.setInviteStatus(InviteStatusEnum.REFUSED.code);
         serviceOrder.setRemark(orderCancelReq.getRemark());
         updateById(serviceOrder);
 
@@ -291,7 +292,7 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
     public PageResDomain<OrderSimpleResp> cliUserOrderPage(OrderPageReq orderPageReq) {
         Long cliUserId = WxUserUtils.current().getUserId();
         if (cliUserId == null) {
-            throw new ServiceException("无法获取订单列表!");
+            return new PageResDomain<>(Lists.newArrayList(), 0L, orderPageReq.getPageSize(), orderPageReq.getCurrent());
         }
         orderPageReq.setCliUserId(cliUserId);
         return this.selectPage(orderPageReq);
@@ -301,7 +302,7 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
     public PageResDomain<OrderSimpleResp> assistOrderPage(OrderPageReq orderPageReq) {
         Assistant assistant = assistComponent.currentUserToAssistant();
         if (assistant == null) {
-            throw new ServiceException("无法获取订单列表！");
+            return new PageResDomain<>(Lists.newArrayList(), 0L, orderPageReq.getPageSize(), orderPageReq.getCurrent());
         }
         orderPageReq.setAssistId(assistant.getId());
         return this.selectPage(orderPageReq);
@@ -310,15 +311,11 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
     private PageResDomain<OrderSimpleResp> selectPage(OrderPageReq orderPageReq) {
         QueryWrapper<ServiceOrder> wrapper = SearchTool.invoke(orderPageReq);
         Page<OrderSimpleResp> page = new Page<>(orderPageReq.getCurrent(), orderPageReq.getPageSize());
+        wrapper.orderByDesc("so.create_time");
         page = this.baseMapper.selectPage(page, wrapper);
         if (page.getTotal() <= 0) {
             return new PageResDomain<>(Lists.newArrayList(), page.getTotal(), page.getSize(), page.getCurrent());
         }
-
-
-
-
-
         return PageResDomain.parse(page, OrderSimpleResp.class);
     }
 
@@ -327,7 +324,7 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         WxAppUser wxAppUser = WxUserUtils.current();
         LambdaQueryWrapper<ServiceOrder> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(ServiceOrder::getOrderNo, orderNo);
-        wrapper.eq(ServiceOrder::getAssistId, wxAppUser.getUserId());
+        wrapper.eq(ServiceOrder::getCliUserId, wxAppUser.getUserId());
         ServiceOrder serviceOrder = this.baseMapper.selectOne(wrapper);
         if (serviceOrder == null) {
             log.error("getCurrentUserServiceOrder not found ! userId={},orderNo={}", wxAppUser.getUserId(), orderNo);

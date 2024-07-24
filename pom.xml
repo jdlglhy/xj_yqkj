@@ -153,13 +153,6 @@
                 <version>${ry.yqkj.version}</version>
             </dependency>
 
-            <!-- 定时任务-->
-            <dependency>
-                <groupId>com.ry.yqkj</groupId>
-                <artifactId>yqkj-s3</artifactId>
-                <version>${ry.yqkj.version}</version>
-            </dependency>
-
             <!-- 核心模块-->
             <dependency>
                 <groupId>com.ry.yqkj</groupId>
@@ -204,7 +197,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.14</version>
+            <version>1.18.30</version>
         </dependency>
     </dependencies>
 
@@ -216,7 +209,6 @@
         <module>yqkj-generator</module>
         <module>yqkj-common</module>
         <module>yqkj-model</module>
-        <module>yqkj-s3</module>
     </modules>
     <packaging>pom</packaging>
 

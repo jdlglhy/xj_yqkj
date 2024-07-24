@@ -35,7 +35,7 @@ public class AssistManagerController extends BaseController {
 
     @Resource
     private IAssistantService assistantService;
-    @Autowired
+    @Resource
     private AssistFormMapper assistFormMapper;
 
 

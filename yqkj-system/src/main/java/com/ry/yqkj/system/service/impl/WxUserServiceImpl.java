@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.text.MessageFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -67,7 +68,7 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
          * js_code = AppSecret 你自己的微信APP密钥
          * grant_type=authorization_code = code 微信官方提供的临时凭证
          */
-        String params = String.format("appid={}&secret={}&js_code={}&grant_type=authorization_code", appId,
+        String params = MessageFormat.format("appid={0}&secret={1}&js_code={2}&grant_type=authorization_code", appId,
                 secret, code);
 
         String md5SessionKey = "";
@@ -82,7 +83,7 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
             String res = HttpUtils.sendGet(url, params);
             log.info("code={},res ={}", code, res);
             codeSession = JSON.parseObject(res, CodeSessionModel.class);
-            if (codeSession == null) {
+            if (codeSession == null || StringUtils.isEmpty(codeSession.getOpenid())) {
                 throw new ServiceException("未获取到对应的openid");
             }
         }

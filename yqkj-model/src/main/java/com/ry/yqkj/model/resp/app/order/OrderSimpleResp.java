@@ -70,6 +70,10 @@ public class OrderSimpleResp implements Serializable {
      */
     private String inviteStatus;
     /**
+     * 评价状态 ： N = 未评价（默认） Y=已评价
+     */
+    private String evalStatus;
+    /**
      * 球馆名称
      */
     private String ballRoomName;
@@ -91,6 +95,11 @@ public class OrderSimpleResp implements Serializable {
      * 拒绝接单原因
      */
     private String refuseReason;
+
+    /**
+     * 用户备注
+     */
+    private String remark;
     /**
      * 创建时间
      */

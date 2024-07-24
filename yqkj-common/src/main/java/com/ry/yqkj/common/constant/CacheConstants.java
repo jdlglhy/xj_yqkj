@@ -19,7 +19,7 @@ public class CacheConstants {
     /**
      * sessionKey 缓存有效期 30天
      */
-    public static Integer SESSION_KEY_EXPIRE_DAYS = 30;
+    public static int SESSION_KEY_EXPIRE_DAYS = 30;
 
     /**
      * 验证码 redis key
