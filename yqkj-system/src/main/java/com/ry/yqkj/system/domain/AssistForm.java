@@ -92,7 +92,18 @@ public class AssistForm implements Serializable {
      * 详细地址
      */
     private String address;
-
+    /**
+     * 门牌号信息
+     */
+    private String doorPlate;
+    /**
+     * 详细地址
+     */
+    private String lng;
+    /**
+     * 详细地址
+     */
+    private String lat;
     /**
      * 出生日期
      */

@@ -1,6 +1,7 @@
 package com.ry.yqkj.model.resp.app.order;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.ry.yqkj.model.resp.app.cliuser.OrderEvalResp;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -17,6 +18,8 @@ import java.util.Date;
 public class OrderDetailResp implements Serializable {
 
     private static final long serialVersionUID = -1L;
+
+    private Long id;
     /**
      * 服务订单号
      */
@@ -121,6 +124,11 @@ public class OrderDetailResp implements Serializable {
      * 拒绝接单原因
      */
     private String refuseReason;
+
+    /**
+     * 订单评价
+     */
+    private OrderEvalResp orderEval;
 
     /**
      * 创建时间

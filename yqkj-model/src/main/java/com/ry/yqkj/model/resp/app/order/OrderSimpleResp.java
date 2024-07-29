@@ -97,6 +97,11 @@ public class OrderSimpleResp implements Serializable {
     private String refuseReason;
 
     /**
+     * U = 用户取消 A = 助教取消
+     */
+    private String cancelFrom;
+
+    /**
      * 用户备注
      */
     private String remark;

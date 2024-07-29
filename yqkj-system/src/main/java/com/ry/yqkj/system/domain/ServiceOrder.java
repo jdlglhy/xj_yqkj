@@ -116,6 +116,11 @@ public class ServiceOrder implements Serializable {
     private String evalStatus;
 
     /**
+     * U = 用户取消 A = 助教取消
+     */
+    private String cancelFrom;
+
+    /**
      * 拒绝接单原因
      */
     private String refuseReason;

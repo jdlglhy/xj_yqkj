@@ -15,7 +15,6 @@ import com.ry.yqkj.system.domain.Assistant;
 import com.ry.yqkj.system.domain.CliUser;
 import com.ry.yqkj.system.domain.WxUser;
 import com.ry.yqkj.system.mapper.app.WxUserMapper;
-import com.ry.yqkj.system.service.IAssistantService;
 import com.ry.yqkj.system.service.ICliUserService;
 import com.ry.yqkj.system.service.IWxUserService;
 import lombok.extern.slf4j.Slf4j;
@@ -74,8 +73,8 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
         String md5SessionKey = "";
 
         CodeSessionModel codeSession = new CodeSessionModel();
-        List<String> codes = Arrays.asList(StringUtils.split(wxTestAuCodes,","));
-        if(codes.contains(code)){
+        List<String> codes = Arrays.asList(StringUtils.split(wxTestAuCodes, ","));
+        if (codes.contains(code)) {
             codeSession.setSession_key(code);
             codeSession.setOpenid(code);
         } else {
@@ -107,7 +106,7 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
             cliUser = new CliUser();
             cliUser.setId(cliUserId);
             cliUser.setWxUserId(wxUser.getId());
-            cliUser.setNickName(String.valueOf(cliUser.getId()));
+            cliUser.setNickName("游客_" + wxUser.getId());
             cliUser.setCreateTime(new Date());
             cliUser.setMark("client");
             wxUser.setCliUserId(cliUser.getId());
@@ -127,12 +126,12 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
 
             //判断是否是助教身份
             Assistant assistant = assistComponent.getAssistant(cliUser.getId());
-            if(assistant != null){
+            if (assistant != null) {
                 codeSession.setAssistId(assistant.getId());
             }
         }
         codeSession.setUserId(cliUser.getId());
-        redisCache.setCacheObject(CacheConstants.SESSION_KEY_PRE + codeSession.getMd5SessionKey(), codeSession,CacheConstants.SESSION_KEY_EXPIRE_DAYS, TimeUnit.DAYS);
+        redisCache.setCacheObject(CacheConstants.SESSION_KEY_PRE + codeSession.getMd5SessionKey(), codeSession, CacheConstants.SESSION_KEY_EXPIRE_DAYS, TimeUnit.DAYS);
 
         //清空sessionKey
         codeSession.setSession_key("");

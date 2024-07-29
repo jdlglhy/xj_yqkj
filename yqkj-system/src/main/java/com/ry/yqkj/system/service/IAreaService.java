@@ -23,11 +23,10 @@ public interface IAreaService extends IService<Area> {
     List<AreaVO> getChildren(String areaName, Integer level);
 
     /**
-     * 通过区域名称和层级获取数据
+     * 获取某一级的区域
      *
-     * @param areaName
      * @param level
      */
-    List<AreaVO> getProvinceList();
+    List<AreaVO> getAreaList(Integer level);
 
 }

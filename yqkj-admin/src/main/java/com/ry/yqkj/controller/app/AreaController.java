@@ -37,7 +37,13 @@ public class AreaController extends WxBaseController {
     @GetMapping("/get/province")
     @ApiOperation("获取省份")
     public R<List<AreaVO>> getProvince() {
-        return R.ok(areaService.getProvinceList());
+        return R.ok(areaService.getAreaList(1));
+    }
+
+    @GetMapping("/get/area")
+    @ApiOperation("获取某一层级的区域")
+    public R<List<AreaVO>> getArea(@ApiParam("层级 0=省，1=市") @RequestParam("level") Integer level) {
+        return R.ok(areaService.getAreaList(level));
     }
 
 }

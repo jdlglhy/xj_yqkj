@@ -36,7 +36,7 @@ public class ServiceOrderController extends WxBaseController {
 
     @GetMapping("/assist/order_detail/{orderNo}")
     @ApiOperation("邀约详情")
-    public R<OrderDetailResp> assistOrderDetail(@PathVariable("orderNo")String orderNo) {
+    public R<OrderDetailResp> assistOrderDetail(@PathVariable("orderNo") String orderNo) {
         return R.ok(serviceOrderService.assistOrderDetail(orderNo));
     }
 

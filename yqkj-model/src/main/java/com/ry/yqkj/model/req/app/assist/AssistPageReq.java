@@ -52,4 +52,11 @@ public class AssistPageReq extends PageReqDomain {
      */
     @ApiModelProperty(value = "价格", required = true)
     private BigDecimal price;
+    /**
+     * 排除的助教ID
+     */
+    @ApiModelProperty(value = "助教ID", required = true)
+    @Search(field = "id", type = SearchType.NOT_IN)
+    private Long excludeAssistId;
+
 }

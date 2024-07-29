@@ -2,7 +2,6 @@ package com.ry.yqkj.system.component;
 
 import com.ry.yqkj.common.config.wxpay.WxPayConfigProperties;
 import com.ry.yqkj.system.domain.ServiceOrder;
-import com.sun.xml.bind.v2.TODO;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.core.notification.NotificationParser;
 import com.wechat.pay.java.service.partnerpayments.app.model.Transaction;
@@ -42,9 +41,9 @@ public class WxPayComponent {
     @PostConstruct
     public void init() throws Exception {
         //TODO 支付需要开启
-//        initConfig();
-//        initPayConfig();
-//        initBackConfig();
+        initConfig();
+        initPayConfig();
+        initBackConfig();
     }
 
     private void initPayConfig() {
@@ -62,7 +61,7 @@ public class WxPayComponent {
     }
 
     private void initConfig() throws Exception {
-        String privateKey = this.loadKeyByResource("wechatPay/wechat_pay_private_key.pem");
+        String privateKey = this.loadKeyByResource("wechatPay/apiclient_key.pem");
         if (config == null) {
             config = new RSAAutoCertificateConfig.Builder()
                     .merchantId(wxPayConfigProperties.getMchId())
@@ -129,6 +128,7 @@ public class WxPayComponent {
     public PrepayWithRequestPaymentResponse prepayWithRequestPayment(ServiceOrder serviceOrder, String openId) {
         PrepayRequest request = new PrepayRequest();
         Amount amount = new Amount();
+        serviceOrder.setTotalAmount(BigDecimal.valueOf(0.01));
         //单位：分
         int totalAmount = (serviceOrder.getTotalAmount().multiply(new BigDecimal(100))).intValue();
         //支付金额

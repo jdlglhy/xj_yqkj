@@ -1,15 +1,25 @@
 package com.ry.yqkj.common.constant;
 
-import java.util.Locale;
 import io.jsonwebtoken.Claims;
+
+import java.util.Locale;
 
 /**
  * 通用常量信息
- * 
+ *
  * @author ry.yqkj
  */
-public class Constants
-{
+public class Constants {
+    /**
+     *
+     */
+    public static final Integer TRUE = 1;
+
+    /**
+     *
+     */
+    public static final Integer FALSE = 0;
+
     /**
      * UTF-8 字符集
      */
@@ -158,18 +168,18 @@ public class Constants
     /**
      * 自动识别json对象白名单配置（仅允许解析的包名，范围越小越安全）
      */
-    public static final String[] JSON_WHITELIST_STR = { "org.springframework", "com.ry.yqkj" };
+    public static final String[] JSON_WHITELIST_STR = {"org.springframework", "com.ry.yqkj"};
 
     /**
      * 定时任务白名单配置（仅允许访问的包名，如其他需要可以自行添加）
      */
-    public static final String[] JOB_WHITELIST_STR = { "com.ry.yqkj.quartz.task" };
+    public static final String[] JOB_WHITELIST_STR = {"com.ry.yqkj.quartz.task"};
 
     /**
      * 定时任务违规的字符
      */
-    public static final String[] JOB_ERROR_STR = { "java.net.URL", "javax.naming.InitialContext", "org.yaml.snakeyaml",
-            "org.springframework", "org.apache", "com.ry.yqkj.common.utils.file", "com.ry.yqkj.common.config", "com.ry.yqkj.generator" };
+    public static final String[] JOB_ERROR_STR = {"java.net.URL", "javax.naming.InitialContext", "org.yaml.snakeyaml",
+            "org.springframework", "org.apache", "com.ry.yqkj.common.utils.file", "com.ry.yqkj.common.config", "com.ry.yqkj.generator"};
 
     /**
      * header 标识

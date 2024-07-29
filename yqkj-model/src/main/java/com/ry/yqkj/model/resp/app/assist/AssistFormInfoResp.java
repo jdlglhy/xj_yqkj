@@ -76,6 +76,18 @@ public class AssistFormInfoResp implements Serializable {
      * 所在 街道、社区
      */
     private String street;
+    /**
+     * 门牌号信息
+     */
+    private String doorPlate;
+    /**
+     * 详细地址
+     */
+    private String lng;
+    /**
+     * 详细地址
+     */
+    private String lat;
 
     /**
      * 详细地址

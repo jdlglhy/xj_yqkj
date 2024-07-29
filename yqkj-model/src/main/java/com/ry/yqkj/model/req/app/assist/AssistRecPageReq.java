@@ -13,6 +13,13 @@ import java.io.Serializable;
  */
 @Data
 public class AssistRecPageReq implements Serializable {
+
+    private static final long serialVersionUID = -1L;
+    /**
+     * 排除的助教ID
+     */
+    @ApiModelProperty(value = "助教ID", required = true)
+    private Long excludeAssistId;
     /**
      * 省
      */

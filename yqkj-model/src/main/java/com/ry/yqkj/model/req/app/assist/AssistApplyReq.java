@@ -101,10 +101,10 @@ public class AssistApplyReq implements Serializable {
     private String county;
 
     /**
-     * 所在 街道、社区
+     * 门牌号信息
      */
-    @ApiModelProperty(value = "街道、社区", required = true)
-    private String street;
+    @ApiModelProperty(value = "门牌信息", required = true)
+    private String doorPlate;
 
     /**
      * 详细地址
@@ -112,6 +112,19 @@ public class AssistApplyReq implements Serializable {
     @ApiModelProperty(value = "详细地址", required = false)
     @Length(max = 50)
     private String address;
+
+    /**
+     * 详细地址
+     */
+    @ApiModelProperty(value = "经度")
+    @Length(max = 50)
+    private String lng;
+    /**
+     * 详细地址
+     */
+    @ApiModelProperty(value = "纬度")
+    @Length(max = 50)
+    private String lat;
 
     /**
      * 出生日期

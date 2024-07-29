@@ -4,6 +4,7 @@ import com.ry.yqkj.common.annotation.RepeatSubmit;
 import com.ry.yqkj.common.core.controller.WxBaseController;
 import com.ry.yqkj.common.core.domain.R;
 import com.ry.yqkj.common.core.page.PageResDomain;
+import com.ry.yqkj.model.req.app.cliuser.EvalRequest;
 import com.ry.yqkj.model.req.app.order.OrderCancelReq;
 import com.ry.yqkj.model.req.app.order.OrderDoneReq;
 import com.ry.yqkj.model.req.app.order.OrderPrepareReq;
@@ -11,6 +12,7 @@ import com.ry.yqkj.model.req.app.order.OrderReq;
 import com.ry.yqkj.model.resp.app.assist.OrderPageReq;
 import com.ry.yqkj.model.resp.app.order.OrderDetailResp;
 import com.ry.yqkj.model.resp.app.order.OrderSimpleResp;
+import com.ry.yqkj.system.service.IOrderEvalService;
 import com.ry.yqkj.system.service.IServiceOrderService;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayWithRequestPaymentResponse;
 import io.swagger.annotations.Api;
@@ -22,7 +24,7 @@ import javax.annotation.Resource;
 
 /**
  * @author : lihy
- * @Description : 助教管理
+ * @Description : 用户侧订单
  * @date : 2024/5/18 12:11 上午
  */
 @RestController
@@ -31,6 +33,8 @@ public class CliUserOrderController extends WxBaseController {
 
     @Resource
     private IServiceOrderService serviceOrderService;
+    @Resource
+    private IOrderEvalService orderEvalService;
 
     @PostMapping("/cli_user/order/page")
     @ApiOperation("用户视角订单分页列表")
@@ -72,6 +76,14 @@ public class CliUserOrderController extends WxBaseController {
     @RepeatSubmit
     public R<Void> done(@Validated @RequestBody OrderDoneReq orderDoneReq) {
         serviceOrderService.done(orderDoneReq);
+        return R.ok();
+    }
+
+    @PostMapping("/cli_user/order/eval")
+    @ApiOperation("评价")
+    @RepeatSubmit
+    public R<Void> eval(@Validated @RequestBody EvalRequest evalRequest) {
+        orderEvalService.eval(evalRequest);
         return R.ok();
     }
 }

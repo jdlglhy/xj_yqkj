@@ -6,77 +6,68 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
  * @author : lihy
- * @Description : 区域代理
+ * @Description : 评价
  * @date : 2024/5/19 11:14 下午
  */
 @Data
-@TableName(value = "area_agent")
-public class AreaAgent {
+@TableName(value = "order_eval")
+public class OrderEval implements Serializable {
+
+    private static final long serialVersionUID = -1L;
     /**
      * 主键
      */
     @TableId(type = IdType.AUTO)
     private Long id;
-
-    /**
-     * 级别 ： 0 = 城市代理 、 1 = 省代理
-     */
-    private Integer level;
-
     /**
      * 用户ID
      */
     private Long cliUserId;
     /**
-     * 系统用户ID 申请通过后会创建对应的系统用户
+     * 助教ID
      */
-    private Long userId;
+    private Long assistId;
+    /**
+     * 订单号
+     */
+    private Long orderId;
 
     /**
-     * 姓名
+     * 是否满意 1 = 满意，0 = 不满意
      */
-    private String realName;
+    private Integer satisfied;
+    /**
+     * 总分（不满意=0，满意=10，+专业+时效+服务态度）
+     */
+    private BigDecimal score;
+    /**
+     * 专业性
+     */
+    private Integer speciality;
+    /**
+     * 时效性
+     */
+    private Integer timeLiness;
 
     /**
-     * 联系方式
+     * 服务态度
      */
-    private String contact;
-    /**
-     * 身份证反面
-     */
-    private String idCardBack;
+    private Integer serviceAttitude;
 
     /**
-     * 身份证 正面
+     * 评价内容
      */
-    private String idCardFront;
-
+    private String content;
     /**
-     * 其他附件信息
+     * 标签多个、分隔
      */
-    private String attachment;
-    /**
-     * 代理的城市
-     */
-    private String areaName;
-    /**
-     * 城市编码
-     */
-    private String areaCode;
-
-    /**
-     * 代理人邮箱
-     */
-    private String email;
-    /**
-     * 状态 approving（审批中）、approved（审批通过）、refused（未通过）
-     */
-    private String status;
-
+    private String tag;
     /**
      * 创建时间
      */

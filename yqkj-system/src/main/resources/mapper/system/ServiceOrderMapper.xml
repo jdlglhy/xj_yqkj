@@ -36,7 +36,8 @@
 
     <!--订单详情-->
     <select id="detail" resultType="com.ry.yqkj.model.resp.app.order.OrderDetailResp">
-        select so.order_no        as orderNo,
+        select so.id              as id,
+               so.order_no        as orderNo,
                so.cli_user_id     as cliUserId,
                acu.nick_name      as cliUserNickName,
                acu.avatar         as cliUserAvatar,
@@ -44,7 +45,7 @@
                aa.nick_name       as assistNickName,
                aa.avatar          as assistAvatar,
                so.reserve_dur     as reserveDur,
-               so.price as price,
+               so.price           as price,
                so.total_amount    as totalAmount,
                so.reserve_time    as reserveTime,
                so.status,
@@ -59,6 +60,6 @@
         from service_order so
                  left join app_assistant aa on aa.id = so.assist_id
                  left join app_cli_user acu on acu.id = so.cli_user_id
-            where so.order_no = #{orderNo}
+        where so.order_no = #{orderNo}
     </select>
 </mapper>

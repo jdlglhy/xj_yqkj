@@ -44,9 +44,9 @@ public class AreaServiceImpl extends ServiceImpl<AreaMapper, Area> implements IA
     }
 
     @Override
-    public List<AreaVO> getProvinceList() {
+    public List<AreaVO> getAreaList(Integer level) {
         LambdaQueryWrapper<Area> wrapper = new LambdaQueryWrapper<Area>();
-        wrapper.eq(Area::getLevel, 0);
+        wrapper.eq(Area::getLevel, level);
         List<Area> areaList = this.baseMapper.selectList(wrapper);
         if (CollectionUtil.isEmpty(areaList)) {
             return Lists.newArrayList();

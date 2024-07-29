@@ -21,6 +21,7 @@ import com.ry.yqkj.model.req.app.order.OrderDoneReq;
 import com.ry.yqkj.model.req.app.order.OrderInviteReq;
 import com.ry.yqkj.model.req.app.order.OrderReq;
 import com.ry.yqkj.model.resp.app.assist.OrderPageReq;
+import com.ry.yqkj.model.resp.app.cliuser.OrderEvalResp;
 import com.ry.yqkj.model.resp.app.order.OrderDetailResp;
 import com.ry.yqkj.model.resp.app.order.OrderSimpleResp;
 import com.ry.yqkj.system.component.AssistComponent;
@@ -38,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -67,6 +69,9 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
 
     @Resource
     private IWxUserService wxUserService;
+
+    @Resource
+    private IOrderEvalService orderEvalService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -121,14 +126,11 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         if (ObjectUtil.notEqual(serviceOrder.getStatus(), OrderStatusEnum.ORDER.code)) {
             throw new ServiceException("状态异常，不允许操作！");
         }
+        serviceOrder.setCancelFrom("U");
         serviceOrder.setStatus(OrderStatusEnum.CANCELED.code);
         serviceOrder.setInviteStatus(InviteStatusEnum.REFUSED.code);
         serviceOrder.setRemark(orderCancelReq.getRemark());
         updateById(serviceOrder);
-
-        Trade trade = tradeService.getByBizNo(serviceOrder.getOrderNo());
-        trade.setStatus(TradeStatusEnum.EXPIRED.code);
-        tradeService.updateById(trade);
     }
 
     @Override
@@ -141,7 +143,7 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         //获取支付的openId
         Long cliUserId = serviceOrder.getCliUserId();
         LambdaQueryWrapper<WxUser> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(WxUser::getOpenId, cliUserId);
+        wrapper.eq(WxUser::getCliUserId, cliUserId);
         WxUser wxUser = wxUserService.getOne(wrapper);
         if (wxUser == null) {
             log.error("未获取到对应的openId. orderNo:{}", orderNo);
@@ -251,6 +253,7 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
                 throw new ServiceException("请填写拒绝原因！");
             }
             serviceOrder.setRefuseReason(inviteReq.getRefusedReason());
+            serviceOrder.setCancelFrom("A");
             //拒绝邀约，取消订单
             serviceOrder.setStatus(OrderStatusEnum.CANCELED.code);
             //获取订单交易记录
@@ -283,6 +286,14 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         OrderDetailResp orderDetailResp = this.baseMapper.detail(orderNo);
         if (ObjectUtil.notEqual(wxAppUser.getUserId(), orderDetailResp.getCliUserId())) {
             throw new ServiceException("无法获取订单！");
+        }
+        if (ObjectUtil.equal(orderDetailResp.getStatus(), OrderStatusEnum.DONE.code)) {
+            OrderEvalResp orderEval = orderEvalService.getDetail(orderDetailResp.getId());
+            String tag = orderEval.getTag();
+            if(StringUtils.isNoneBlank(tag)){
+                orderEval.setTags(Arrays.asList(StringUtils.split(tag,"、")));
+            }
+            orderDetailResp.setOrderEval(orderEval);
         }
         return orderDetailResp;
     }

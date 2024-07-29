@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import org.hibernate.validator.constraints.Length;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -76,6 +78,18 @@ public class Assistant implements Serializable {
      * 所在 街道、社区
      */
     private String street;
+    /**
+     * 门牌号信息
+     */
+    private String doorPlate;
+    /**
+     * 详细地址
+     */
+    private String lng;
+    /**
+     * 详细地址
+     */
+    private String lat;
 
     /**
      * 状态
