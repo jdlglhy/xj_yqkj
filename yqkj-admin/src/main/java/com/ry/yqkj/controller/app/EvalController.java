@@ -10,6 +10,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
@@ -20,7 +21,7 @@ import javax.annotation.Resource;
  * @date : 2024/7/8 12:11 上午
  */
 @RestController
-@Api("区域管理")
+@Api("评价管理")
 public class EvalController extends WxBaseController {
 
     @Resource
@@ -28,7 +29,7 @@ public class EvalController extends WxBaseController {
 
     @PostMapping("/eval/assist/eval_page")
     @ApiOperation("助教详情【评价列表】")
-    public R<PageResDomain<OrderEvalResp>> assistEvalPage(@Validated EvalPageRequest evalPageRequest) {
+    public R<PageResDomain<OrderEvalResp>> assistEvalPage(@RequestBody @Validated EvalPageRequest evalPageRequest) {
         return R.ok(orderEvalService.assistEvalPage(evalPageRequest));
     }
 }

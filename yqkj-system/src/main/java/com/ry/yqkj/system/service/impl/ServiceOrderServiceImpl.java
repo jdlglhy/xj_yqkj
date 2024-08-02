@@ -20,6 +20,7 @@ import com.ry.yqkj.model.req.app.order.OrderCancelReq;
 import com.ry.yqkj.model.req.app.order.OrderDoneReq;
 import com.ry.yqkj.model.req.app.order.OrderInviteReq;
 import com.ry.yqkj.model.req.app.order.OrderReq;
+import com.ry.yqkj.model.resp.app.assist.AssistEvalResp;
 import com.ry.yqkj.model.resp.app.assist.OrderPageReq;
 import com.ry.yqkj.model.resp.app.cliuser.OrderEvalResp;
 import com.ry.yqkj.model.resp.app.order.OrderDetailResp;
@@ -41,6 +42,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author : lihy
@@ -290,8 +294,8 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         if (ObjectUtil.equal(orderDetailResp.getStatus(), OrderStatusEnum.DONE.code)) {
             OrderEvalResp orderEval = orderEvalService.getDetail(orderDetailResp.getId());
             String tag = orderEval.getTag();
-            if(StringUtils.isNoneBlank(tag)){
-                orderEval.setTags(Arrays.asList(StringUtils.split(tag,"、")));
+            if (StringUtils.isNoneBlank(tag)) {
+                orderEval.setTags(Arrays.asList(StringUtils.split(tag, "、")));
             }
             orderDetailResp.setOrderEval(orderEval);
         }
@@ -327,7 +331,24 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         if (page.getTotal() <= 0) {
             return new PageResDomain<>(Lists.newArrayList(), page.getTotal(), page.getSize(), page.getCurrent());
         }
+        renderServiceOrder(page.getRecords());
         return PageResDomain.parse(page, OrderSimpleResp.class);
+    }
+
+    private void renderServiceOrder(List<OrderSimpleResp> serviceOrders) {
+        Set<Long> assistSet = serviceOrders.stream().map(OrderSimpleResp::getAssistId).collect(Collectors.toSet());
+        Map<Long, AssistEvalResp> map = orderEvalService.assistEvalPage(assistSet);
+        serviceOrders.forEach(order -> {
+            AssistEvalResp assistEvalResp = map.get(order.getAssistId());
+            if (assistEvalResp == null) {
+                return;
+            }
+            OrderSimpleResp.AssistEval assistEval = new OrderSimpleResp.AssistEval();
+            assistEval.setScore(assistEvalResp.getScore() == null ? BigDecimal.ZERO : assistEvalResp.getScore());
+            if (StringUtils.isNoneBlank(assistEvalResp.getTag())) {
+                assistEval.setTags(Arrays.asList(StringUtils.split(assistEvalResp.getTag(), "、")));
+            }
+        });
     }
 
     private ServiceOrder getCurrentUserServiceOrder(String orderNo) {

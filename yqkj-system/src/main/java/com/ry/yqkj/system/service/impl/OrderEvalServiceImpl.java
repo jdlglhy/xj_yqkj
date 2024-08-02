@@ -5,6 +5,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.common.collect.Maps;
 import com.ry.yqkj.common.constant.Constants;
 import com.ry.yqkj.common.core.page.PageResDomain;
 import com.ry.yqkj.common.exception.ServiceException;
@@ -31,6 +32,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author : lihy
@@ -109,11 +112,11 @@ public class OrderEvalServiceImpl extends ServiceImpl<OrderEvalMapper, OrderEval
 
     @Override
     public Map<Long, AssistEvalResp> assistEvalPage(Set<Long> assistIdSet) {
-        LambdaQueryWrapper<OrderEval> wrapper = new LambdaQueryWrapper<>();
-        wrapper.in(OrderEval::getAssistId, assistIdSet);
-        wrapper.orderByDesc(OrderEval::getScore);
-        wrapper.groupBy(OrderEval::getAssistId);
-
+        List<AssistEvalResp> assistEvalResps = baseMapper.selectAssistEval(assistIdSet);
+        if (CollUtil.isEmpty(assistEvalResps)) {
+            return Maps.newHashMap();
+        }
+        return assistEvalResps.stream().collect(Collectors.toMap(AssistEvalResp::getAssistId, Function.identity()));
     }
 
 }

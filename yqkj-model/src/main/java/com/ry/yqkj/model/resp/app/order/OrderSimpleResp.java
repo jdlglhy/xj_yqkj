@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author : lihy
@@ -101,6 +102,7 @@ public class OrderSimpleResp implements Serializable {
      */
     private String cancelFrom;
 
+
     /**
      * 用户备注
      */
@@ -114,4 +116,15 @@ public class OrderSimpleResp implements Serializable {
      * 创建人
      */
     private String createBy;
+
+    /**
+     * 助教标签、星级信息
+     */
+    private AssistEval assistEval;
+
+    @Data
+    public static class AssistEval implements Serializable {
+        private BigDecimal score;
+        private List<String> tags;
+    }
 }

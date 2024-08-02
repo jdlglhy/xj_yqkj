@@ -1,4 +1,4 @@
-package com.ry.yqkj.system.domain;
+package com.ry.yqkj.model.resp.web.agent;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -15,7 +15,7 @@ import java.util.Date;
  */
 @Data
 @TableName(value = "area_agent")
-public class AreaAgent {
+public class AreaAgentResp {
     /**
      * 主键
      */
@@ -45,20 +45,20 @@ public class AreaAgent {
      * 联系方式
      */
     private String contact;
-//    /**
-//     * 身份证反面
-//     */
-//    private String idCardBack;
-//
-//    /**
-//     * 身份证 正面
-//     */
-//    private String idCardFront;
-//
-//    /**
-//     * 其他附件信息
-//     */
-//    private String attachment;
+    /**
+     * 身份证反面
+     */
+    private String idCardBack;
+
+    /**
+     * 身份证 正面
+     */
+    private String idCardFront;
+
+    /**
+     * 其他附件信息
+     */
+    private String attachment;
     /**
      * 代理的城市
      */

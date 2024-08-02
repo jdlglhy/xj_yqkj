@@ -29,4 +29,11 @@ public interface IAreaService extends IService<Area> {
      */
     List<AreaVO> getAreaList(Integer level);
 
+    /**
+     * 通过code获取区域
+     *
+     * @param code
+     */
+    AreaVO getAreaByCode(String code);
+
 }

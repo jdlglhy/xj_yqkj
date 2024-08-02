@@ -82,7 +82,7 @@ public class CliUserOrderController extends WxBaseController {
     @PostMapping("/cli_user/order/eval")
     @ApiOperation("评价")
     @RepeatSubmit
-    public R<Void> eval(@Validated @RequestBody EvalRequest evalRequest) {
+    public R<Void> done(@Validated @RequestBody EvalRequest evalRequest) {
         orderEvalService.eval(evalRequest);
         return R.ok();
     }

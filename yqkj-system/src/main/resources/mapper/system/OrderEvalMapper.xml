@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ry.yqkj.system.mapper.OrderEvalMapper">
+
+    <!--服务订单分页-->
+    <select id="selectAssistEval" resultType="com.ry.yqkj.model.resp.app.assist.AssistEvalResp">
+        SELECT
+        assist_id as assistId,
+        Floor(AVG(score)) as score,
+        any_value (tag) as tag
+        FROM
+        order_eval
+        <where>
+            <if test="assistIdSet !=null and assistIdSet.size() >0 ">
+                <foreach collection="assistIdSet" open=" and assist_id in(" close=")" item="assistId" separator=",">
+                    #{assistId}
+                </foreach>
+            </if>
+        </where>
+        GROUP BY
+        assist_id;
+    </select>
+</mapper>

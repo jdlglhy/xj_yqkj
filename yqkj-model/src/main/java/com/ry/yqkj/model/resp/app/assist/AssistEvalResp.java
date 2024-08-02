@@ -4,7 +4,6 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * @author : lihy
@@ -18,9 +17,12 @@ public class AssistEvalResp implements Serializable {
     /**
      * 助教标签（默认获取三个）
      */
-    private List<String> tags;
+    private String tag;
     /**
      * 分数
      */
     private BigDecimal score;
+
+
+    private Long assistId;
 }
