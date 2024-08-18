@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 @Data
 @ApiModel("审批请求参数")
-public class AssistFormExamReq implements Serializable {
+public class WebAssistFormExamReq implements Serializable {
     private static final long serialVersionUID = -1L;
 
     @ApiModelProperty(value = "审批单ID", required = true, notes = "")

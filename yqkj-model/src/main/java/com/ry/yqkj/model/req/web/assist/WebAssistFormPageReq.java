@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @ApiModel("助教申请单请求参数")
-public class AssistFormPageReq extends PageReqDomain {
+public class WebAssistFormPageReq extends PageReqDomain {
     private static final long serialVersionUID = -1L;
 
 }

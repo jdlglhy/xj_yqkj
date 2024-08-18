@@ -12,7 +12,7 @@ import java.io.Serializable;
  * @date : 2024/5/19 11:14 下午
  */
 @Data
-public class AgentExamineRequest implements Serializable {
+public class WebAgentExamineRequest implements Serializable {
 
     private static final long serialVersionUID = -1L;
     /**

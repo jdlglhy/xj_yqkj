@@ -3,9 +3,9 @@ package com.ry.yqkj.system.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ry.yqkj.common.core.page.PageResDomain;
 import com.ry.yqkj.model.req.app.agent.AreaAgentApplyRequest;
-import com.ry.yqkj.model.req.web.agent.AgentUpdateRequest;
-import com.ry.yqkj.model.req.web.agent.AreaAgentPageReq;
-import com.ry.yqkj.model.resp.web.agent.AreaAgentResp;
+import com.ry.yqkj.model.req.web.agent.WebAgentUpdateRequest;
+import com.ry.yqkj.model.req.web.agent.WebAreaAgentPageReq;
+import com.ry.yqkj.model.resp.web.agent.WebAreaAgentResp;
 import com.ry.yqkj.system.domain.AreaAgent;
 
 /**
@@ -37,7 +37,7 @@ public interface IAreaAgentService extends IService<AreaAgent> {
      *
      * @param request 变更参数
      */
-    void updateAgent(AgentUpdateRequest request);
+    void updateAgent(WebAgentUpdateRequest request);
 
 
     /**
@@ -46,14 +46,20 @@ public interface IAreaAgentService extends IService<AreaAgent> {
      * @param req
      * @return PageResDomain
      */
-    PageResDomain<AreaAgentResp> page(AreaAgentPageReq req);
+    PageResDomain<WebAreaAgentResp> page(WebAreaAgentPageReq req);
 
-
+    /**
+     * 区域代理审批分页列表数据
+     *
+     * @param req
+     * @return PageResDomain
+     */
+    PageResDomain<WebAreaAgentResp> examinePage(WebAreaAgentPageReq req);
     /**
      * 详情
      *
      * @return AreaAgentResp
      */
-    AreaAgentResp detail();
+    WebAreaAgentResp detail();
 
 }

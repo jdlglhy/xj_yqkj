@@ -5,6 +5,7 @@ import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.List;
@@ -21,8 +22,8 @@ public class EvalRequest implements Serializable {
     /**
      * 订单号
      */
-    @NotNull(message = "订单ID不能为空")
-    private Long orderId;
+    @NotBlank(message = "订单号不能为空")
+    private String orderNo;
 
     /**
      * 是否满意 1 = 满意，0 = 不满意

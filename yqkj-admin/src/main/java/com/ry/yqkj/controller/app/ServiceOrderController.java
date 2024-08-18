@@ -5,6 +5,7 @@ import com.ry.yqkj.common.core.controller.WxBaseController;
 import com.ry.yqkj.common.core.domain.R;
 import com.ry.yqkj.common.core.page.PageResDomain;
 import com.ry.yqkj.model.req.app.order.OrderInviteReq;
+import com.ry.yqkj.model.req.app.order.OrderServiceStartReq;
 import com.ry.yqkj.model.resp.app.assist.OrderPageReq;
 import com.ry.yqkj.model.resp.app.order.OrderDetailResp;
 import com.ry.yqkj.model.resp.app.order.OrderSimpleResp;
@@ -45,6 +46,14 @@ public class ServiceOrderController extends WxBaseController {
     @RepeatSubmit
     public R<Void> invite(@Validated @RequestBody OrderInviteReq orderInviteReq) {
         serviceOrderService.invite(orderInviteReq);
+        return R.ok();
+    }
+
+    @PostMapping("/assist/order/service_start")
+    @ApiOperation("开始服务")
+    @RepeatSubmit
+    public R<Void> serviceStart(@Validated @RequestBody OrderServiceStartReq serviceStartReq) {
+        serviceOrderService.orderServiceStart(serviceStartReq);
         return R.ok();
     }
 }

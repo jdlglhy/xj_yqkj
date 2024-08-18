@@ -16,10 +16,13 @@ import com.ry.yqkj.model.enums.OrderStatusEnum;
 import com.ry.yqkj.model.req.app.cliuser.EvalPageRequest;
 import com.ry.yqkj.model.req.app.cliuser.EvalRequest;
 import com.ry.yqkj.model.resp.app.assist.AssistEvalResp;
+import com.ry.yqkj.model.resp.app.cliuser.CliUserInfoResp;
 import com.ry.yqkj.model.resp.app.cliuser.OrderEvalResp;
+import com.ry.yqkj.system.domain.CliUser;
 import com.ry.yqkj.system.domain.OrderEval;
 import com.ry.yqkj.system.domain.ServiceOrder;
 import com.ry.yqkj.system.mapper.OrderEvalMapper;
+import com.ry.yqkj.system.service.ICliUserService;
 import com.ry.yqkj.system.service.IOrderEvalService;
 import com.ry.yqkj.system.service.IServiceOrderService;
 import lombok.extern.slf4j.Slf4j;
@@ -47,10 +50,12 @@ public class OrderEvalServiceImpl extends ServiceImpl<OrderEvalMapper, OrderEval
 
     @Resource
     private IServiceOrderService serviceOrderService;
+    @Resource
+    private ICliUserService cliUserService;
 
     @Override
     public void eval(EvalRequest evalRequest) {
-        ServiceOrder serviceOrder = serviceOrderService.getById(evalRequest.getOrderId());
+        ServiceOrder serviceOrder = serviceOrderService.getByOrderNo(evalRequest.getOrderNo());
         if (serviceOrder == null) {
             throw new ServiceException("未找到对应订单！");
         }
@@ -99,12 +104,16 @@ public class OrderEvalServiceImpl extends ServiceImpl<OrderEvalMapper, OrderEval
         if (page.getTotal() <= 0) {
             return new PageResDomain<>(Lists.newArrayList(), 0L, request.getPageSize(), request.getCurrent());
         }
+        List<Long> cliUserIds = page.getRecords().stream().map(OrderEval::getCliUserId).collect(Collectors.toList());
+        List<CliUser> cliUserList = cliUserService.listByIds(cliUserIds);
+        Map<Long,CliUser> cliUserMap = cliUserList.stream().collect(Collectors.toMap(CliUser::getId, Function.identity()));
         List<OrderEvalResp> orderEvalRespList = Lists.newArrayList();
         page.getRecords().forEach(eval -> {
             OrderEvalResp orderEvalResp = DozerUtil.map(eval, OrderEvalResp.class);
             if (StringUtils.isNoneBlank(eval.getTag())) {
                 orderEvalResp.setTags(Arrays.asList(StringUtils.split(eval.getTag(), "、")));
             }
+            orderEvalResp.setCliUserInfoResp(DozerUtil.map(cliUserMap.getOrDefault(eval.getCliUserId(),new CliUser()), CliUserInfoResp.class));
             orderEvalRespList.add(orderEvalResp);
         });
         return new PageResDomain<>(orderEvalRespList, page.getTotal(), request.getPageSize(), request.getCurrent());

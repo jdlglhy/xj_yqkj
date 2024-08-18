@@ -13,10 +13,17 @@ public interface IWxUserService extends IService<WxUser> {
     /**
      * 绑定微信用户
      *
-     * @param code
-     * @return
+     * @param code 授权码
+     * @return 授权信息
      */
     CodeSessionModel bindWxUser(String code);
+
+
+    /**
+     * @param cliUserId 客戶端ID
+     * @return WxUser
+     */
+    WxUser getWxUserByCliUserId(Long cliUserId);
 
 
 }

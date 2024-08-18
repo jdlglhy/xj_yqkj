@@ -7,6 +7,7 @@ import com.ry.yqkj.common.core.domain.model.CodeSessionModel;
 import com.ry.yqkj.common.utils.DozerUtil;
 import com.ry.yqkj.model.req.app.WxAuthorizeReq;
 import com.ry.yqkj.model.resp.CodeSessionResp;
+import com.ry.yqkj.system.component.WxMsgTemplateComponent;
 import com.ry.yqkj.system.component.WxPayComponent;
 import com.ry.yqkj.system.service.IServiceOrderService;
 import com.ry.yqkj.system.service.IWxUserService;
@@ -67,5 +68,15 @@ public class WxApiController extends BaseController {
             //通知微信回调失败
             response.getWriter().write("<xml><return_code><![CDATA[FAIL]]></return_code></xml>");
         }
+    }
+
+    @Resource
+    private WxMsgTemplateComponent wxMsgTemplateComponent;
+
+    @PostMapping("/send")
+    @ApiOperation("测试消息发送")
+    public R<Void> send() {
+        wxMsgTemplateComponent.sendWxTemplateMessage(null);
+        return R.ok();
     }
 }

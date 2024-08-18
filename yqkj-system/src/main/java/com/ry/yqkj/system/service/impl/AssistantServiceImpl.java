@@ -14,20 +14,25 @@ import com.ry.yqkj.common.utils.WxUserUtils;
 import com.ry.yqkj.common.utils.mp.search.SearchTool;
 import com.ry.yqkj.common.utils.uuid.SnowflakeIdUtil;
 import com.ry.yqkj.model.enums.ApproveEnum;
+import com.ry.yqkj.model.enums.UserTypeEnum;
 import com.ry.yqkj.model.req.app.assist.AssistApplyReq;
 import com.ry.yqkj.model.req.app.assist.AssistPageReq;
 import com.ry.yqkj.model.req.app.assist.AssistRecPageReq;
-import com.ry.yqkj.model.req.web.assist.AssistFormExamReq;
-import com.ry.yqkj.model.req.web.assist.AssistFormPageReq;
+import com.ry.yqkj.model.req.web.assist.WebAssistFormExamReq;
+import com.ry.yqkj.model.req.web.assist.WebAssistFormPageReq;
+import com.ry.yqkj.model.req.web.assist.WebAssistPageReq;
 import com.ry.yqkj.model.resp.app.assist.AssistDetailResp;
 import com.ry.yqkj.model.resp.app.assist.AssistFormInfoResp;
 import com.ry.yqkj.model.resp.app.assist.AssistInfoResp;
+import com.ry.yqkj.model.resp.web.assist.WebAssistInfoResp;
 import com.ry.yqkj.system.domain.AssistForm;
 import com.ry.yqkj.system.domain.Assistant;
 import com.ry.yqkj.system.domain.CliUser;
+import com.ry.yqkj.system.domain.CliUserAuth;
 import com.ry.yqkj.system.mapper.app.AssistFormMapper;
 import com.ry.yqkj.system.mapper.app.AssistantMapper;
 import com.ry.yqkj.system.service.IAssistantService;
+import com.ry.yqkj.system.service.ICliUserAuthService;
 import com.ry.yqkj.system.service.ICliUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -55,6 +60,8 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
     private AssistantMapper assistantMapper;
     @Resource
     private ICliUserService cliUserService;
+    @Resource
+    private ICliUserAuthService cliUserAuthService;
 
 
     @Override
@@ -85,7 +92,7 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
         form.setCreateBy(cliUser.getId() + "_" + cliUser.getNickName());
         //审批状态
         form.setApproveState(ApproveEnum.APPROVING.code);
-        form.setLifePhoto(StringUtils.join(assistApplyReq.getLifePhotos(),";"));
+        form.setLifePhoto(StringUtils.join(assistApplyReq.getLifePhotos(), ";"));
         assistFormMapper.insert(form);
     }
 
@@ -99,24 +106,32 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
             return new AssistFormInfoResp();
         }
         AssistFormInfoResp assistFormInfoResp = DozerUtil.map(assistForm.get(0), AssistFormInfoResp.class);
-        if(StringUtils.isNoneBlank(assistForm.get(0).getLifePhoto())){
-            assistFormInfoResp.setLifePhotos(Arrays.asList(StringUtils.split(assistForm.get(0).getLifePhoto(),";")));
+        if (StringUtils.isNoneBlank(assistForm.get(0).getLifePhoto())) {
+            assistFormInfoResp.setLifePhotos(Arrays.asList(StringUtils.split(assistForm.get(0).getLifePhoto(), ";")));
         }
         return DozerUtil.map(assistForm.get(0), AssistFormInfoResp.class);
     }
 
     @Override
-    public PageResDomain<AssistFormInfoResp> fromPage(AssistFormPageReq assistFormPageReq) {
-        Page<AssistForm> page = new Page<>(assistFormPageReq.getCurrent(), assistFormPageReq.getPageSize());
-        QueryWrapper<AssistForm> queryWrapper = SearchTool.invoke(assistFormPageReq);
+    public PageResDomain<AssistFormInfoResp> fromPage(WebAssistFormPageReq webAssistFormPageReq) {
+        Page<AssistForm> page = new Page<>(webAssistFormPageReq.getCurrent(), webAssistFormPageReq.getPageSize());
+        QueryWrapper<AssistForm> queryWrapper = SearchTool.invoke(webAssistFormPageReq);
         queryWrapper.lambda().orderByDesc(AssistForm::getCreateTime);
         page = assistFormMapper.selectPage(page, queryWrapper);
         return PageResDomain.parse(page, AssistFormInfoResp.class);
     }
 
     @Override
+    public PageResDomain<WebAssistInfoResp> page(WebAssistPageReq assistPageReq) {
+        Page<Assistant> page = new Page<>(assistPageReq.getCurrent(), assistPageReq.getPageSize());
+        QueryWrapper<Assistant> queryWrapper = SearchTool.invoke(assistPageReq);
+        page = this.baseMapper.selectPage(page, queryWrapper);
+        return PageResDomain.parse(page, WebAssistInfoResp.class);
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
-    public void examine(AssistFormExamReq req) {
+    public void examine(WebAssistFormExamReq req) {
         if (!ApproveEnum.APPROVED.validate(req.getApproveState())) {
             throw new ServiceException("error，传入的状态错误！");
         }
@@ -149,6 +164,13 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
         assistant.setCreateTime(new Date());
         assistant.setCreateBy(assistForm.getApprover());
         assistantMapper.insert(assistant);
+        //添加助教用户身份标识
+        CliUserAuth cliUserAuth = new CliUserAuth();
+        cliUserAuth.setCliUserId(assistForm.getCliUserId());
+        cliUserAuth.setUserType(UserTypeEnum.ASSISTANT.getCode());
+        cliUserAuth.setTargetId(assistant.getId());
+        cliUserAuthService.save(cliUserAuth);
+
     }
 
     @Override
@@ -177,4 +199,5 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
         }
         return assistDetailResp;
     }
+
 }

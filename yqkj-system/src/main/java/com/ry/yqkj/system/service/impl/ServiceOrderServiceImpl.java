@@ -16,16 +16,14 @@ import com.ry.yqkj.model.enums.InviteStatusEnum;
 import com.ry.yqkj.model.enums.ModulePreFixEnum;
 import com.ry.yqkj.model.enums.OrderStatusEnum;
 import com.ry.yqkj.model.enums.TradeStatusEnum;
-import com.ry.yqkj.model.req.app.order.OrderCancelReq;
-import com.ry.yqkj.model.req.app.order.OrderDoneReq;
-import com.ry.yqkj.model.req.app.order.OrderInviteReq;
-import com.ry.yqkj.model.req.app.order.OrderReq;
+import com.ry.yqkj.model.req.app.order.*;
 import com.ry.yqkj.model.resp.app.assist.AssistEvalResp;
 import com.ry.yqkj.model.resp.app.assist.OrderPageReq;
 import com.ry.yqkj.model.resp.app.cliuser.OrderEvalResp;
 import com.ry.yqkj.model.resp.app.order.OrderDetailResp;
 import com.ry.yqkj.model.resp.app.order.OrderSimpleResp;
 import com.ry.yqkj.system.component.AssistComponent;
+import com.ry.yqkj.system.component.WxMsgTemplateComponent;
 import com.ry.yqkj.system.component.WxPayComponent;
 import com.ry.yqkj.system.domain.*;
 import com.ry.yqkj.system.mapper.app.ServiceOrderMapper;
@@ -77,6 +75,9 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
     @Resource
     private IOrderEvalService orderEvalService;
 
+    @Resource
+    private WxMsgTemplateComponent wxMsgTemplateComponent;
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void order(OrderReq orderReq) {
@@ -99,6 +100,9 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
             BigDecimal reserveDur = orderReq.getReserveDur();
             //助教费用
             BigDecimal assistTotal = price.multiply(reserveDur);
+            if(orderReq.getTaxFee() != null){
+                assistTotal = assistTotal.add(orderReq.getTaxFee());
+            }
             //总费用
             ServiceOrder serviceOrder = DozerUtil.map(orderReq, ServiceOrder.class);
             serviceOrder.setCliUserId(cliUserId);
@@ -108,6 +112,7 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
             serviceOrder.setInviteStatus(InviteStatusEnum.INVITED.code);
             serviceOrder.setAssistFee(assistTotal);
             serviceOrder.setPrice(price);
+            serviceOrder.setTaxFee(orderReq.getTaxFee());
             serviceOrder.setTotalAmount(assistTotal);
 
             if (serviceOrder.getTotalAmount().compareTo(BigDecimal.ZERO) <= 0) {
@@ -121,6 +126,8 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
             serviceOrder.setCategory("助教订单");
             this.baseMapper.insert(serviceOrder);
         }
+        //模版消息发送
+        //wxMsgTemplateComponent.sendWxTemplateMessage(cliUserId);
     }
 
     @Override
@@ -271,6 +278,23 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
     }
 
     @Override
+    public void orderServiceStart(OrderServiceStartReq serviceStartReq) {
+        ServiceOrder serviceOrder = getByOrderNo(serviceStartReq.getOrderNo());
+        if (serviceOrder == null) {
+            throw new ServiceException("未获取到对应订单！");
+        }
+        if (OrderStatusEnum.SERVICING.code.equals(serviceOrder.getStatus())) {
+            return;
+        }
+        if (ObjectUtil.notEqual(OrderStatusEnum.PAID.code, serviceOrder.getStatus())) {
+            throw new ServiceException("当前状态不允许操作！");
+        }
+        serviceOrder.setStatus(OrderStatusEnum.SERVICING.code);
+        serviceOrder.setModifyBy(WxUserUtils.current().getUserId().toString());
+        this.baseMapper.updateById(serviceOrder);
+    }
+
+    @Override
     public OrderDetailResp assistOrderDetail(String orderNo) {
         Assistant assistant = assistComponent.currentUserToAssistant();
         if (assistant == null) {
@@ -321,6 +345,13 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         }
         orderPageReq.setAssistId(assistant.getId());
         return this.selectPage(orderPageReq);
+    }
+
+    @Override
+    public ServiceOrder getByOrderNo(String orderNo) {
+        LambdaQueryWrapper<ServiceOrder> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(ServiceOrder::getOrderNo, orderNo);
+        return this.baseMapper.selectOne(wrapper);
     }
 
     private PageResDomain<OrderSimpleResp> selectPage(OrderPageReq orderPageReq) {
@@ -380,4 +411,5 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         }
         return serviceOrder;
     }
+
 }

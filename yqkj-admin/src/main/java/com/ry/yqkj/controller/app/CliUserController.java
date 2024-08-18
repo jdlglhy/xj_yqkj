@@ -5,11 +5,13 @@ import com.ry.yqkj.common.core.domain.R;
 import com.ry.yqkj.common.core.domain.model.WxAppUser;
 import com.ry.yqkj.common.utils.DozerUtil;
 import com.ry.yqkj.model.req.app.cliuser.CliUserInfoSetReq;
+import com.ry.yqkj.model.resp.app.cliuser.CliUserAuthResp;
 import com.ry.yqkj.model.resp.app.cliuser.CliUserInfoResp;
 import com.ry.yqkj.system.component.AssistComponent;
 import com.ry.yqkj.system.domain.Assistant;
 import com.ry.yqkj.system.domain.CliUser;
 import com.ry.yqkj.system.service.IAssistantService;
+import com.ry.yqkj.system.service.ICliUserAuthService;
 import com.ry.yqkj.system.service.ICliUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,6 +38,8 @@ public class CliUserController extends WxBaseController {
 
     @Resource
     private AssistComponent assistComponent;
+    @Resource
+    private ICliUserAuthService cliUserAuthService;
 
     @PostMapping("/cli_user/set_simple_info")
     @ApiOperation("设置基本信息")
@@ -55,5 +59,12 @@ public class CliUserController extends WxBaseController {
             cliUserInfoResp.setAssistId(assistant.getId());
         }
         return R.ok(cliUserInfoResp);
+    }
+
+    @GetMapping("/cli_user/auth")
+    @ApiOperation("获取用户身份信息")
+    public R<CliUserAuthResp> currentUserAuth() {
+        WxAppUser wxAppUser = getCurrent();
+        return R.ok(cliUserAuthService.currentUserAuth(wxAppUser.getUserId()));
     }
 }

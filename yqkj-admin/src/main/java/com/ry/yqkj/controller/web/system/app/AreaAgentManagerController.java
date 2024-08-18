@@ -3,10 +3,10 @@ package com.ry.yqkj.controller.web.system.app;
 import com.ry.yqkj.common.core.controller.BaseController;
 import com.ry.yqkj.common.core.domain.R;
 import com.ry.yqkj.common.core.page.PageResDomain;
-import com.ry.yqkj.model.req.web.agent.AgentExamineRequest;
-import com.ry.yqkj.model.req.web.agent.AgentUpdateRequest;
-import com.ry.yqkj.model.req.web.agent.AreaAgentPageReq;
-import com.ry.yqkj.model.resp.web.agent.AreaAgentResp;
+import com.ry.yqkj.model.req.web.agent.WebAgentExamineRequest;
+import com.ry.yqkj.model.req.web.agent.WebAgentUpdateRequest;
+import com.ry.yqkj.model.req.web.agent.WebAreaAgentPageReq;
+import com.ry.yqkj.model.resp.web.agent.WebAreaAgentResp;
 import com.ry.yqkj.system.service.IAreaAgentService;
 import io.swagger.annotations.Api;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,20 +33,31 @@ public class AreaAgentManagerController extends BaseController {
     private IAreaAgentService areaAgentService;
 
     /**
+     * 区域代理审核列表
+     */
+    @PreAuthorize("@ss.hasPermi('area_agent:form:examine')")
+    @PostMapping("/examine/page")
+    public R<PageResDomain<WebAreaAgentResp>> examinePage(@Validated @RequestBody WebAreaAgentPageReq webAreaAgentPageReq) {
+        return R.ok(areaAgentService.examinePage(webAreaAgentPageReq));
+    }
+
+
+    /**
      * 区域代理列表
      */
     @PreAuthorize("@ss.hasPermi('area_agent:list')")
     @PostMapping("/page")
-    public R<PageResDomain<AreaAgentResp>> page(@Validated @RequestBody AreaAgentPageReq areaAgentPageReq) {
-        return R.ok(areaAgentService.page(areaAgentPageReq));
+    public R<PageResDomain<WebAreaAgentResp>> page(@Validated @RequestBody WebAreaAgentPageReq webAreaAgentPageReq) {
+        return R.ok(areaAgentService.page(webAreaAgentPageReq));
     }
+
 
     /**
      * 审批
      */
     @PreAuthorize("@ss.hasPermi('area_agent:examine')")
     @PostMapping("/examine")
-    public R<Void> examine(@RequestBody @Validated AgentExamineRequest req) {
+    public R<Void> examine(@RequestBody @Validated WebAgentExamineRequest req) {
         areaAgentService.examine(req.getId(), req.getStatus(), req.getRefuseReason());
         return R.ok();
     }
@@ -56,7 +67,7 @@ public class AreaAgentManagerController extends BaseController {
      */
     @PreAuthorize("@ss.hasPermi('area_agent:update')")
     @PostMapping("/update")
-    public R<Void> updateAgent(@Validated @RequestBody AgentUpdateRequest request) {
+    public R<Void> updateAgent(@Validated @RequestBody WebAgentUpdateRequest request) {
         areaAgentService.updateAgent(request);
         return R.ok();
     }

@@ -15,7 +15,7 @@ import java.util.Date;
  */
 @Data
 @TableName(value = "area_agent")
-public class AreaAgentResp {
+public class WebAreaAgentResp {
     /**
      * 主键
      */

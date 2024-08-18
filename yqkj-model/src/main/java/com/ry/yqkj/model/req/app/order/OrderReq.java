@@ -5,14 +5,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -28,7 +24,7 @@ public class OrderReq implements Serializable {
      */
     @ApiModelProperty(value = "助教ID集合", required = true)
     @NotEmpty(message = "助教ID集合不能为空")
-    @Size(max = 5,message = "最多只能选择5个")
+    @Size(max = 5, message = "最多只能选择5个")
     private Set<Long> assistIdSet;
 
     /**
@@ -59,6 +55,10 @@ public class OrderReq implements Serializable {
     @NotBlank(message = "球馆地址不能为空")
     @Length(max = 128)
     private String serviceAddress;
+
+    @ApiModelProperty(value = "打车费用", required = true)
+    @DecimalMin(value = "0")
+    private BigDecimal taxFee;
 
     /**
      * 经度

@@ -1,6 +1,6 @@
-package com.ry.yqkj.controller.app;
+package com.ry.yqkj.controller.web.tool;
 
-import com.ry.yqkj.common.core.controller.WxBaseController;
+import com.ry.yqkj.common.core.controller.BaseController;
 import com.ry.yqkj.common.core.domain.R;
 import com.ry.yqkj.controller.web.common.CommonController;
 import com.ry.yqkj.framework.config.s3.S3ConfigProperties;
@@ -24,8 +24,8 @@ import java.io.IOException;
  * @author ry.yqkj
  */
 @Api("文件上传")
-@RestController
-public class S3Controller extends WxBaseController {
+@RestController("/web")
+public class WebS3Controller extends BaseController {
     private static final Logger log = LoggerFactory.getLogger(CommonController.class);
 
     @Resource

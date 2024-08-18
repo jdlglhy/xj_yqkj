@@ -10,7 +10,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @ApiModel("区域代理分页请求参数")
-public class AreaAgentPageReq extends PageReqDomain {
+public class WebAreaAgentPageReq extends PageReqDomain {
     private static final long serialVersionUID = -1L;
 
     /**

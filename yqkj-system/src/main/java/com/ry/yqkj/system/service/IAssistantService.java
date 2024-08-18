@@ -5,11 +5,13 @@ import com.ry.yqkj.common.core.page.PageResDomain;
 import com.ry.yqkj.model.req.app.assist.AssistApplyReq;
 import com.ry.yqkj.model.req.app.assist.AssistPageReq;
 import com.ry.yqkj.model.req.app.assist.AssistRecPageReq;
-import com.ry.yqkj.model.req.web.assist.AssistFormExamReq;
-import com.ry.yqkj.model.req.web.assist.AssistFormPageReq;
+import com.ry.yqkj.model.req.web.assist.WebAssistFormExamReq;
+import com.ry.yqkj.model.req.web.assist.WebAssistFormPageReq;
+import com.ry.yqkj.model.req.web.assist.WebAssistPageReq;
 import com.ry.yqkj.model.resp.app.assist.AssistDetailResp;
 import com.ry.yqkj.model.resp.app.assist.AssistFormInfoResp;
 import com.ry.yqkj.model.resp.app.assist.AssistInfoResp;
+import com.ry.yqkj.model.resp.web.assist.WebAssistInfoResp;
 import com.ry.yqkj.system.domain.Assistant;
 
 /**
@@ -41,14 +43,24 @@ public interface IAssistantService extends IService<Assistant> {
      *
      * @return
      */
-    PageResDomain<AssistFormInfoResp> fromPage(AssistFormPageReq assistFormPageReq);
+    PageResDomain<AssistFormInfoResp> fromPage(WebAssistFormPageReq webAssistFormPageReq);
+
+
+    /**
+     * 后台助教列表
+     *
+     * @param webAssistPageReq
+     * @return
+     */
+    PageResDomain<WebAssistInfoResp> page(WebAssistPageReq webAssistPageReq);
+
 
     /**
      * 审批
      *
      * @param req 审批请求参数
      */
-    void examine(AssistFormExamReq req);
+    void examine(WebAssistFormExamReq req);
 
     /**
      * 助教分页

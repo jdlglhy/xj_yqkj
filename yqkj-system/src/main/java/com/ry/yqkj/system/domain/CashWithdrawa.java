@@ -28,6 +28,10 @@ public class CashWithdrawa implements Serializable {
      */
     private Long accountId;
     /**
+     * 账户类型 0 = 助教、1 = 用户、2 = 系统账户
+     */
+    private Integer accountType;
+    /**
      * 银行卡号
      */
     private String bankNo;

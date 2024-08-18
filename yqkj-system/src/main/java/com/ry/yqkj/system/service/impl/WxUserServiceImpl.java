@@ -57,6 +57,7 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
     @Value("${wx.test.auCodes}")
     private String wxTestAuCodes;
 
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public CodeSessionModel bindWxUser(String code) {
@@ -136,6 +137,13 @@ public class WxUserServiceImpl extends ServiceImpl<WxUserMapper, WxUser> impleme
         //清空sessionKey
         codeSession.setSession_key("");
         return codeSession;
+    }
+
+    @Override
+    public WxUser getWxUserByCliUserId(Long cliUserId) {
+        LambdaQueryWrapper<WxUser> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(WxUser::getCliUserId, cliUserId);
+        return baseMapper.selectOne(wrapper);
     }
 
 

@@ -3,6 +3,7 @@ package com.ry.yqkj.model.resp.app.cliuser;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -33,6 +34,8 @@ public class OrderEvalResp implements Serializable {
      */
     private Integer serviceAttitude;
 
+    private BigDecimal score;
+
     /**
      * 评价内容
      */
@@ -45,4 +48,9 @@ public class OrderEvalResp implements Serializable {
      * 标签多个、分隔
      */
     private List<String> tags;
+
+    /**
+     * 用户信息
+     */
+    private CliUserInfoResp cliUserInfoResp;
 }

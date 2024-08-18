@@ -1,18 +1,17 @@
-package com.ry.yqkj.model.resp.app.assist;
+package com.ry.yqkj.model.resp.web.assist;
 
 import lombok.Data;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.List;
 
 /**
  * @author : lihy
- * @Description : 助教详情
+ * @Description : 助教信息
  * @date : 2024/5/19 11:14 下午
  */
 @Data
-public class AssistDetailResp implements Serializable {
+public class WebAssistInfoResp implements Serializable {
 
     private static final long serialVersionUID = -1L;
     /**
@@ -24,18 +23,9 @@ public class AssistDetailResp implements Serializable {
      */
     private String nickName;
     /**
-     * 费用
+     * 费用（单位：元/小时）
      */
     private BigDecimal price;
-
-    /**
-     * 可预约时间 （10：00-14：00 多个逗号拼接）
-     */
-    private String reservePeriod;
-    /**
-     * 生活照
-     */
-    private List<String> lifePhotos;
     /**
      * 头像
      */
@@ -57,26 +47,18 @@ public class AssistDetailResp implements Serializable {
      * 所在 区、县
      */
     private String county;
-
     /**
-     * 所在 街道、社区
+     * 街道、社区
      */
     private String street;
+
     /**
-     * 状态
+     * 状态 online = 在线 offline = 离线
      */
     private String status;
+
     /**
      * 个性签名
      */
     private String perSign;
-
-    /**
-     * 详细地址
-     */
-    private String lng;
-    /**
-     * 详细地址
-     */
-    private String lat;
 }

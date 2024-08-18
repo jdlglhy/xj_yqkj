@@ -14,17 +14,16 @@ import com.ry.yqkj.common.utils.WxUserUtils;
 import com.ry.yqkj.common.utils.mp.search.SearchTool;
 import com.ry.yqkj.model.common.vo.AreaVO;
 import com.ry.yqkj.model.enums.ApproveEnum;
+import com.ry.yqkj.model.enums.UserTypeEnum;
 import com.ry.yqkj.model.req.app.agent.AreaAgentApplyRequest;
-import com.ry.yqkj.model.req.web.agent.AgentUpdateRequest;
-import com.ry.yqkj.model.req.web.agent.AreaAgentPageReq;
-import com.ry.yqkj.model.resp.web.agent.AreaAgentResp;
+import com.ry.yqkj.model.req.web.agent.WebAgentUpdateRequest;
+import com.ry.yqkj.model.req.web.agent.WebAreaAgentPageReq;
+import com.ry.yqkj.model.resp.web.agent.WebAreaAgentResp;
 import com.ry.yqkj.system.domain.AreaAgent;
+import com.ry.yqkj.system.domain.CliUserAuth;
 import com.ry.yqkj.system.domain.UserArea;
 import com.ry.yqkj.system.mapper.AreaAgentMapper;
-import com.ry.yqkj.system.service.IAreaAgentService;
-import com.ry.yqkj.system.service.IAreaService;
-import com.ry.yqkj.system.service.ISysUserService;
-import com.ry.yqkj.system.service.IUserAreaService;
+import com.ry.yqkj.system.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,6 +46,8 @@ public class IAreaAgentServiceImpl extends ServiceImpl<AreaAgentMapper, AreaAgen
     private ISysUserService sysUserService;
     @Resource
     private IUserAreaService userAreaService;
+    @Resource
+    private ICliUserAuthService cliUserAuthService;
 
     @Override
     public void apply(AreaAgentApplyRequest request) {
@@ -106,24 +107,34 @@ public class IAreaAgentServiceImpl extends ServiceImpl<AreaAgentMapper, AreaAgen
     public void examine(Long id, String status, String reason) {
         AreaAgent areaAgent = checkCanExamine(id, status, reason);
         areaAgent.setStatus(status);
-        if (StringUtils.isNoneBlank()) {
-            areaAgent.setRefuseReason(reason);
+        if (ApproveEnum.REFUSED.code.equals(status) && StringUtils.isBlank(reason)) {
+            throw new ServiceException("请填写不通过的原因！");
         }
+        areaAgent.setRefuseReason(reason);
         baseMapper.updateById(areaAgent);
         if (ApproveEnum.APPROVED.code.equals(status)) {
-
-
-            //创建系统账号、绑定区域
-            SysUser sysUser = new SysUser();
-            sysUser.setUserName(areaAgent.getRealName());
-            sysUser.setNickName(areaAgent.getRealName());
-            sysUser.setPhonenumber(areaAgent.getContact());
-            sysUser.setUserType("01");
-            sysUser.setEmail(areaAgent.getEmail());
-            if (!sysUserService.checkUserNameUnique(sysUser)) {
-                throw new ServiceException("生成系统账户异常，用户名【" + areaAgent.getRealName() + "】已存在！");
+            Long targetId = cliUserAuthService.isAreaAgent(areaAgent.getCliUserId());
+            SysUser sysUser = null;
+            if (targetId != null) {
+                sysUser = sysUserService.selectUserById(targetId);
+            } else {
+                //创建系统账号、绑定区域
+                sysUser = new SysUser();
+                sysUser.setUserName(areaAgent.getRealName());
+                sysUser.setNickName(areaAgent.getRealName());
+                sysUser.setPhonenumber(areaAgent.getContact());
+                sysUser.setUserType(UserTypeEnum.AREA_AGENT.getCode());
+                sysUser.setEmail(areaAgent.getEmail());
+                if (!sysUserService.checkUserNameUnique(sysUser)) {
+                    throw new ServiceException("生成系统账户异常，用户名【" + areaAgent.getRealName() + "】已存在！");
+                }
+                sysUserService.insertUser(sysUser);
+                CliUserAuth cliUserAuth = new CliUserAuth();
+                cliUserAuth.setTargetId(sysUser.getUserId());
+                cliUserAuth.setUserType(UserTypeEnum.AREA_AGENT.getCode());
+                cliUserAuth.setCliUserId(areaAgent.getCliUserId());
+                cliUserAuthService.save(cliUserAuth);
             }
-            sysUserService.insertUser(sysUser);
 
             UserArea userArea = new UserArea();
             userArea.setAreaCode(areaAgent.getAreaCode());
@@ -138,7 +149,7 @@ public class IAreaAgentServiceImpl extends ServiceImpl<AreaAgentMapper, AreaAgen
     }
 
     @Override
-    public void updateAgent(AgentUpdateRequest request) {
+    public void updateAgent(WebAgentUpdateRequest request) {
         AreaAgent areaAgent = this.getById(request.getId());
         //审批中可以进行信息变更
         if (ObjectUtil.notEqual(ApproveEnum.APPROVED.code, areaAgent.getStatus())) {
@@ -154,7 +165,20 @@ public class IAreaAgentServiceImpl extends ServiceImpl<AreaAgentMapper, AreaAgen
     }
 
     @Override
-    public PageResDomain<AreaAgentResp> page(AreaAgentPageReq req) {
+    public PageResDomain<WebAreaAgentResp> page(WebAreaAgentPageReq req) {
+        QueryWrapper<AreaAgent> wrapper = SearchTool.invoke(req);
+        wrapper.lambda().eq(AreaAgent::getStatus, ApproveEnum.APPROVED.code);
+        Page<AreaAgent> page = new Page<>(req.getCurrent(), req.getPageSize());
+        page = baseMapper.selectPage(page, wrapper);
+
+        if (page.getTotal() <= 0) {
+            return new PageResDomain<>();
+        }
+        return PageResDomain.parse(page, WebAreaAgentResp.class);
+    }
+
+    @Override
+    public PageResDomain<WebAreaAgentResp> examinePage(WebAreaAgentPageReq req) {
         QueryWrapper<AreaAgent> wrapper = SearchTool.invoke(req);
         Page<AreaAgent> page = new Page<>(req.getCurrent(), req.getPageSize());
         page = baseMapper.selectPage(page, wrapper);
@@ -162,11 +186,11 @@ public class IAreaAgentServiceImpl extends ServiceImpl<AreaAgentMapper, AreaAgen
         if (page.getTotal() <= 0) {
             return new PageResDomain<>();
         }
-        return PageResDomain.parse(page, AreaAgentResp.class);
+        return PageResDomain.parse(page, WebAreaAgentResp.class);
     }
 
     @Override
-    public AreaAgentResp detail() {
+    public WebAreaAgentResp detail() {
         Long wxUserId = WxUserUtils.current().getUserId();
         LambdaQueryWrapper<AreaAgent> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(AreaAgent::getCliUserId, wxUserId);
@@ -174,7 +198,7 @@ public class IAreaAgentServiceImpl extends ServiceImpl<AreaAgentMapper, AreaAgen
         wrapper.last("limit 1");
         AreaAgent agent = baseMapper.selectOne(wrapper);
         if (agent != null) {
-            return DozerUtil.map(agent, AreaAgentResp.class);
+            return DozerUtil.map(agent, WebAreaAgentResp.class);
         }
         return null;
     }

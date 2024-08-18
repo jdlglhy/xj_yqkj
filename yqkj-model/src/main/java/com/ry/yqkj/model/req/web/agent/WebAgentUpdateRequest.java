@@ -1,10 +1,8 @@
 package com.ry.yqkj.model.req.web.agent;
 
 import lombok.Data;
-import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
@@ -14,7 +12,7 @@ import java.io.Serializable;
  * @date : 2024/5/19 11:14 下午
  */
 @Data
-public class AgentUpdateRequest implements Serializable {
+public class WebAgentUpdateRequest implements Serializable {
 
     private static final long serialVersionUID = -1L;
     /**

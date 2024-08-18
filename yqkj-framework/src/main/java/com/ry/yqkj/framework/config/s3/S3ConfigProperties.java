@@ -39,6 +39,8 @@ public class S3ConfigProperties {
      */
     private String secretKey;
 
+    private String imgUrl;
+
     /**
      * 最大线程数，默认：100
      */

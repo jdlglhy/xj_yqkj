@@ -29,6 +29,7 @@ public interface IServiceOrderService extends IService<ServiceOrder> {
      * @param orderCancelReq 取消下单参数
      */
     void cancel(OrderCancelReq orderCancelReq);
+
     /**
      * 预支付
      *
@@ -39,7 +40,7 @@ public interface IServiceOrderService extends IService<ServiceOrder> {
     /**
      * 支付成功回调
      *
-     * @param tradeNo  第三方交易号
+     * @param tradeNo 第三方交易号
      */
     void payNotify(String orderNum, String tradeNo);
 
@@ -58,6 +59,12 @@ public interface IServiceOrderService extends IService<ServiceOrder> {
      */
     void invite(OrderInviteReq inviteReq);
 
+    /**
+     * 服务开始
+     *
+     * @param serviceStartReq 服务开始参数
+     */
+    void orderServiceStart(OrderServiceStartReq serviceStartReq);
 
     /**
      * 助教获取订单详情
@@ -88,4 +95,12 @@ public interface IServiceOrderService extends IService<ServiceOrder> {
      */
     PageResDomain<OrderSimpleResp> assistOrderPage(OrderPageReq orderPageReq);
 
+
+    /**
+     * 通过订单号获取
+     *
+     * @param orderNo
+     * @return
+     */
+    ServiceOrder getByOrderNo(String orderNo);
 }

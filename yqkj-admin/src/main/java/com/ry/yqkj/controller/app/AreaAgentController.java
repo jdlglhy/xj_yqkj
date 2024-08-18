@@ -3,7 +3,7 @@ package com.ry.yqkj.controller.app;
 import com.ry.yqkj.common.core.controller.WxBaseController;
 import com.ry.yqkj.common.core.domain.R;
 import com.ry.yqkj.model.req.app.agent.AreaAgentApplyRequest;
-import com.ry.yqkj.model.resp.web.agent.AreaAgentResp;
+import com.ry.yqkj.model.resp.web.agent.WebAreaAgentResp;
 import com.ry.yqkj.system.service.IAreaAgentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -36,7 +36,7 @@ public class AreaAgentController extends WxBaseController {
 
     @GetMapping("/area_agent/detail")
     @ApiOperation("详情")
-    public R<AreaAgentResp> detail() {
+    public R<WebAreaAgentResp> detail() {
         return R.ok(areaAgentService.detail());
     }
 }
