@@ -1,12 +1,10 @@
-package com.ry.yqkj.system.domain;
+package com.ry.yqkj.model.resp.web.cashwd;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -15,22 +13,13 @@ import java.util.Date;
  * @date : 2024/5/19 11:14 下午
  */
 @Data
-@TableName(value = "cash_withdrawa")
-public class CashWithdrawa implements Serializable {
+public class WebCashWdPageResp implements Serializable {
 
-    /**
-     * 主键
-     */
-    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
     /**
      * 用户ID
      */
     private Long accountId;
-    /**
-     * 账户类型 0 = 助教、1 = 用户、2 = 系统账户
-     */
-    private Integer accountType;
     /**
      * 银行卡号
      */
@@ -47,6 +36,11 @@ public class CashWithdrawa implements Serializable {
      * 手机号
      */
     private String phone;
+
+    /**
+     * 提现金额
+     */
+    private BigDecimal amount;
 
     /**
      * 转账凭证

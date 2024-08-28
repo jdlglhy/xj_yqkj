@@ -57,7 +57,7 @@ public class OrderReq implements Serializable {
     private String serviceAddress;
 
     @ApiModelProperty(value = "打车费用", required = true)
-    @DecimalMin(value = "0")
+    @DecimalMin(value = "0", message = "打车费用必须大于等于0")
     private BigDecimal taxFee;
 
     /**

@@ -6,79 +6,64 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
  * @author : lihy
- * @Description : 场馆入住
+ * @Description : 提现管理
  * @date : 2024/5/19 11:14 下午
  */
 @Data
-@TableName(value = "venue_settle_in")
-public class VenueSettleIn {
+@TableName(value = "cash_withdrawa")
+public class CashWithdraw implements Serializable {
+
     /**
      * 主键
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     private Long id;
+    /**
+     * 用户ID
+     */
+    private Long accountId;
+    /**
+     * 银行卡号
+     */
+    private String bankNo;
+    /**
+     * 银行类型
+     */
+    private String bankType;
+    /**
+     * 收款方
+     */
+    private String payee;
+    /**
+     * 手机号
+     */
+    private String phone;
 
     /**
-     * 球馆名称
+     * 提现金额
      */
-    private String name;
-    /**
-     * 球馆图片
-     */
-    private String image;
+    private BigDecimal amount;
 
     /**
-     * 简介
+     * 转账凭证
      */
-    private String introduction;
+    private String attach;
 
     /**
-     * 营业时间
-     */
-    private String businessHour;
-
-    /**
-     * 联系人
-     */
-    private String contactName;
-    /**
-     * 联系方式
-     */
-    private String contact;
-    /**
-     * 球馆电话
-     */
-    private String tel;
-    /**
-     * 维度
-     */
-    private String lat;
-    /**
-     * 精度
-     */
-    private String lng;
-
-    private String province;
-    private String city;
-    private String county;
-    /**
-     * 球馆地址（省市区 + 详细地址）
-     */
-    private String address;
-    /**
-     * 备注信息
+     * 备注
      */
     private String remark;
 
     /**
-     * 状态 approving（审批中）、approved（审批通过）、refused（未通过）
+     * 状态：processing = 处理中、done = 完成、expired = 已失效
      */
     private String status;
-
     /**
      * 创建时间
      */
@@ -97,5 +82,4 @@ public class VenueSettleIn {
      * 修改人
      */
     private String modifyBy;
-
 }
