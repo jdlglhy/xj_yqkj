@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 /**
@@ -42,8 +44,6 @@ public class S3Controller extends WxBaseController {
     @ApiOperation("图片上传")
     @PostMapping("/s3/upload/img")
     public R<AttachmentVO> uploadAvatar(@RequestParam("file") MultipartFile file) throws IOException {
-
-        System.out.println(file.getOriginalFilename());
         AttachmentVO attachmentVO = templateApi
                 .upload(configProperties.getBucketName(), "img", file.getOriginalFilename(), file.getContentType(), file.getInputStream());
         attachmentVO.setFilePath(configProperties.getImgUrl() + attachmentVO.getFilePath());

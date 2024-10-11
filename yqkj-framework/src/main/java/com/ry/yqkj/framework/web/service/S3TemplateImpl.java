@@ -11,12 +11,15 @@ import com.amazonaws.util.StringUtils;
 import com.ry.yqkj.framework.config.s3.S3ConfigProperties;
 import com.ry.yqkj.framework.web.api.TemplateApi;
 import com.ry.yqkj.model.common.vo.AttachmentVO;
+import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.net.URL;
@@ -86,23 +89,59 @@ public class S3TemplateImpl implements TemplateApi {
 
     @Override
     @SneakyThrows
-    public AttachmentVO upload(String bucketName, String folder, String fileName, String contentType, InputStream inputStream) {
-        bucketName = getDefaultBucket(bucketName);
-        byte[] bytes = IOUtils.toByteArray(inputStream);
-        ObjectMetadata objectMetadata = new ObjectMetadata();
-        objectMetadata.setContentLength(bytes.length);
-        objectMetadata.setContentType(contentType);
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-        String dataTimeFmt = DateUtil.format(new Date(), "yyyyMMddHHmmss");
-        String filePath = path(folder) + dataTimeFmt + "_" + fileName;
-        if (!amazonS3.doesBucketExistV2(bucketName)) {
-            amazonS3.createBucket(bucketName);
+    public AttachmentVO upload(String bucketName, String folder,
+                               String fileName, String contentType,
+                               InputStream inputStream) {
+        try{
+            bucketName = getDefaultBucket(bucketName);
+            byte[] bytes = IOUtils.toByteArray(inputStream);
+            ObjectMetadata objectMetadata = new ObjectMetadata();
+            objectMetadata.setContentLength(bytes.length);
+            objectMetadata.setContentType(contentType);
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+            String dataTimeFmt = DateUtil.format(new Date(), "yyyyMMddHHmmss");
+
+            StringBuilder fileUrl = new StringBuilder();
+            fileUrl.append(path(folder)).append(dataTimeFmt);
+
+            @Cleanup
+            ByteArrayInputStream stream = new ByteArrayInputStream(bytes);
+            BufferedImage bufferedImage = isImage(stream);
+
+            if(bufferedImage != null){
+                fileUrl.append("&w=").append(bufferedImage.getWidth()).append("&h=").append(bufferedImage.getHeight());
+            }
+            fileUrl.append("_").append(fileName);
+            String filePath = fileUrl.toString();
+            if (!amazonS3.doesBucketExistV2(bucketName)) {
+                amazonS3.createBucket(bucketName);
+            }
+            PutObjectResult result = amazonS3.putObject(bucketName, filePath, byteArrayInputStream, objectMetadata);
+            log.info("响应：{}", JSON.toJSONString(result));
+            return render(bucketName, fileName, filePath);
+        }catch (Exception e){
+
+        }finally {
+            if(inputStream != null){
+                inputStream.close();
+            }
         }
-        PutObjectResult result = amazonS3.putObject(bucketName, filePath, byteArrayInputStream, objectMetadata);
-        log.info("响应：{}", JSON.toJSONString(result));
-        return render(bucketName, fileName, filePath);
+        return null;
     }
 
+
+    private BufferedImage isImage(InputStream inputStream) {
+        BufferedImage bi = null;
+        try {
+            bi = ImageIO.read(inputStream);
+            if (null != bi) {
+                return bi;
+            }
+        } catch (Exception e) {
+            log.warn("非图片上传..");
+        }
+        return bi;
+    }
 
     private String path(String folder) {
         if (StrUtil.isBlank(folder)) {

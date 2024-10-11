@@ -28,4 +28,8 @@ public class AttachmentVO implements Serializable {
      */
     private String filePath;
 
+    private int height;
+
+    private int width;
+
 }

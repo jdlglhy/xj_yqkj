@@ -34,6 +34,11 @@ public class Assistant implements Serializable {
      * 昵称
      */
     private String nickName;
+
+    /**
+     * 真实姓名
+     */
+    private String realName;
     /**
      * 费用
      */
