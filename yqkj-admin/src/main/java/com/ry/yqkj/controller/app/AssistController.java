@@ -5,6 +5,7 @@ import com.ry.yqkj.common.core.domain.R;
 import com.ry.yqkj.common.core.page.PageResDomain;
 import com.ry.yqkj.common.utils.WxUserUtils;
 import com.ry.yqkj.model.req.app.assist.AssistApplyReq;
+import com.ry.yqkj.model.req.app.assist.AssistBaseEditReq;
 import com.ry.yqkj.model.req.app.assist.AssistPageReq;
 import com.ry.yqkj.model.req.app.assist.AssistRecPageReq;
 import com.ry.yqkj.model.resp.app.assist.AssistDetailResp;
@@ -44,6 +45,13 @@ public class AssistController extends WxBaseController {
     @ApiOperation("助教详情")
     public R<AssistDetailResp> assistDetail(@PathVariable("assistId") Long assistId) {
         return R.ok(assistantService.assistDetail(assistId));
+    }
+
+    @PostMapping("/assist/edit")
+    @ApiOperation("编辑助教基本信息")
+    public R<Void> editAssist(@Validated @RequestBody AssistBaseEditReq assistBaseEditReq) {
+        assistantService.assistBaseEdit(assistBaseEditReq);
+        return R.ok();
     }
 
     @PostMapping("/assist/form")

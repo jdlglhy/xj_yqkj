@@ -16,6 +16,7 @@ import com.ry.yqkj.common.utils.uuid.SnowflakeIdUtil;
 import com.ry.yqkj.model.enums.ApproveEnum;
 import com.ry.yqkj.model.enums.UserTypeEnum;
 import com.ry.yqkj.model.req.app.assist.AssistApplyReq;
+import com.ry.yqkj.model.req.app.assist.AssistBaseEditReq;
 import com.ry.yqkj.model.req.app.assist.AssistPageReq;
 import com.ry.yqkj.model.req.app.assist.AssistRecPageReq;
 import com.ry.yqkj.model.req.web.assist.WebAssistFormExamReq;
@@ -69,6 +70,25 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
         WxAppUser wxAppUser = WxUserUtils.current();
         CliUser cliUser = cliUserService.getById(wxAppUser.getUserId());
         //助教身份验证
+        if (assistApplyReq.getId() != null) {
+            AssistForm assistForm = assistFormMapper.selectById(assistApplyReq.getId());
+            if (assistForm == null) {
+                throw new ServiceException("未获取到对应的申请信息！");
+            }
+            if (ObjectUtils.notEqual(assistForm.getCliUserId(), cliUser.getId())) {
+                throw new ServiceException("无法操作！");
+            }
+            //审批通过的无法修改
+            if (ApproveEnum.APPROVED.code.equals(assistForm.getApproveState())) {
+                throw new ServiceException("审批通过、无法修改！");
+            }
+            assistForm.setApproveState(ApproveEnum.APPROVING.code);
+            assistForm = DozerUtil.map(assistApplyReq, AssistForm.class);
+            assistForm.setLifePhoto(StringUtils.join(assistApplyReq.getLifePhotos(), ";"));
+            assistFormMapper.updateById(assistForm);
+            return;
+        }
+
         LambdaQueryWrapper<Assistant> assistWrap = new LambdaQueryWrapper<>();
         assistWrap.eq(Assistant::getCliUserId, cliUser.getId());
         Assistant assistant = assistantMapper.selectOne(assistWrap);
@@ -103,7 +123,7 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
         formWrap.orderByDesc(AssistForm::getId);
         List<AssistForm> assistForm = assistFormMapper.selectList(formWrap);
         if (CollectionUtil.isEmpty(assistForm)) {
-            return new AssistFormInfoResp();
+            return null;
         }
         AssistFormInfoResp assistFormInfoResp = DozerUtil.map(assistForm.get(0), AssistFormInfoResp.class);
         if (StringUtils.isNoneBlank(assistForm.get(0).getLifePhoto())) {
@@ -199,5 +219,22 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
         }
         return assistDetailResp;
     }
+
+    @Override
+    public void assistBaseEdit(AssistBaseEditReq assistBaseEditReq) {
+        Assistant assistant = assistantMapper.selectById(assistBaseEditReq.getAssistId());
+        if (assistant == null) {
+            throw new ServiceException("未获取到助教信息！");
+        }
+        if (ObjectUtils.notEqual(WxUserUtils.current().getUserId(), assistant.getCliUserId())) {
+            throw new ServiceException("无法修改！");
+        }
+        DozerUtil.map(assistBaseEditReq, assistant);
+        assistant.setLifePhoto(StringUtils.join(assistBaseEditReq.getLifePhotos(), ","));
+        assistant.setModifyTime(new Date());
+        assistant.setModifyBy("用户_" + WxUserUtils.current().getUserId().toString());
+        assistantMapper.updateById(assistant);
+    }
+
 
 }

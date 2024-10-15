@@ -3,6 +3,7 @@ package com.ry.yqkj.system.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ry.yqkj.common.core.page.PageResDomain;
 import com.ry.yqkj.model.req.app.assist.AssistApplyReq;
+import com.ry.yqkj.model.req.app.assist.AssistBaseEditReq;
 import com.ry.yqkj.model.req.app.assist.AssistPageReq;
 import com.ry.yqkj.model.req.app.assist.AssistRecPageReq;
 import com.ry.yqkj.model.req.web.assist.WebAssistFormExamReq;
@@ -86,5 +87,14 @@ public interface IAssistantService extends IService<Assistant> {
      * @return
      */
     AssistDetailResp assistDetail(Long assistId);
+
+
+    /**
+     * 编辑助教信息
+     *
+     * @param assistBaseEditReq
+     * @return
+     */
+    void assistBaseEdit(AssistBaseEditReq assistBaseEditReq);
 
 }

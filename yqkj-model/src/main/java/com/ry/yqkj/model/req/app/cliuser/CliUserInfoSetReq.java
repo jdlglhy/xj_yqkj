@@ -30,7 +30,6 @@ public class CliUserInfoSetReq implements Serializable {
      * 头像
      */
     @ApiModelProperty(value = "头像",required = false)
-    @Length(min = 2,max = 255)
     private String avatar;
 
     /**
