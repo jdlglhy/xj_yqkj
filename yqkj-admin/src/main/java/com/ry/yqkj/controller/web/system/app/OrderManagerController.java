@@ -19,7 +19,8 @@ import javax.annotation.Resource;
  * @Description : 后台-订单管理
  * @date : 2024/5/18 12:11 上午
  */
-@RestController("/service_order")
+@RestController
+@RequestMapping("/service_order")
 @Api("后台订单管理")
 public class OrderManagerController extends BaseController {
 

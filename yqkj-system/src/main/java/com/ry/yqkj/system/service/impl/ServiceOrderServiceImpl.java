@@ -38,10 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -215,6 +212,7 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         }
         //TODO 验证订单完成的时间（跟服务时间应该有一定的间隔）
         serviceOrder.setStatus(OrderStatusEnum.DONE.code);
+        serviceOrder.setFinishTime(new Date());
         updateById(serviceOrder);
         synchronized (serviceOrder.getCliUserId()) {
             //TODO 订单完成后、订单收入金额 -> 可提现金额（提现设置7天可提现一次）
@@ -226,10 +224,10 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
             //TODO 后期修改通过提成规则获取比例
             //本次入账金额
             BigDecimal income = serviceOrder.getTotalAmount().multiply(serviceOrder.getRate());
-            freezeAmount = freezeAmount.subtract(income);
-            withdrawAmount = withdrawAmount.add(income);
+            freezeAmount = freezeAmount.add(income);
+//            withdrawAmount = withdrawAmount.add(income);
             fund.setFreezeAmount(freezeAmount);
-            fund.setWithdrawAmount(withdrawAmount);
+//            fund.setWithdrawAmount(withdrawAmount);
             fundService.updateById(fund);
         }
     }

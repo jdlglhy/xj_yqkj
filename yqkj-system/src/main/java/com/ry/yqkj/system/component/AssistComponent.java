@@ -1,5 +1,6 @@
 package com.ry.yqkj.system.component;
 
+import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ry.yqkj.common.core.domain.model.WxAppUser;
 import com.ry.yqkj.common.utils.WxUserUtils;
@@ -8,6 +9,7 @@ import com.ry.yqkj.system.service.impl.AssistantServiceImpl;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @Component
 public class AssistComponent {
@@ -23,7 +25,8 @@ public class AssistComponent {
     public Assistant getAssistant(Long userId) {
         LambdaQueryWrapper<Assistant> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(Assistant::getCliUserId, userId);
-        return assistantService.getOne(wrapper);
+        List<Assistant> assistantList = assistantService.list(wrapper);
+        return CollUtil.isNotEmpty(assistantList) ? assistantList.get(0) : null;
     }
 
     /**

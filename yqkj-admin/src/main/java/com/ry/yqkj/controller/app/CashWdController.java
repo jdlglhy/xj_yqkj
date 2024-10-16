@@ -1,5 +1,6 @@
 package com.ry.yqkj.controller.app;
 
+import com.ry.yqkj.common.annotation.RepeatSubmit;
 import com.ry.yqkj.common.core.controller.WxBaseController;
 import com.ry.yqkj.common.core.domain.R;
 import com.ry.yqkj.common.core.page.PageResDomain;
@@ -30,15 +31,17 @@ public class CashWdController extends WxBaseController {
     private ICashWdService cashWdService;
 
 
-    @PostMapping("/cashwd/apply")
+    @PostMapping("/cash_wd/apply")
     @ApiOperation("提现申请")
+    @RepeatSubmit(interval = 1000, message = "请勿重复操作！")
     public R<Void> apply(@Validated @RequestBody CashWdApplyReq req) {
+        cashWdService.cashWdApply(req);
         return R.ok();
     }
 
-    @PostMapping("/cashwd/page")
+    @PostMapping("/cash_wd/page")
     @ApiOperation("提现记录")
     public R<PageResDomain<CashWdInfoResp>> page(@Validated @RequestBody CashWdPageReq req) {
-        return R.ok();
+        return R.ok(cashWdService.cashPageRecord(req));
     }
 }

@@ -23,7 +23,7 @@ public class WebCashWdPageResp implements Serializable {
     /**
      * 银行卡号
      */
-    private String bankNo;
+    private String bankCard;
     /**
      * 银行类型
      */

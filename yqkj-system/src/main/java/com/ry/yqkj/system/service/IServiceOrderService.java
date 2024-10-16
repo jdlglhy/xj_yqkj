@@ -45,7 +45,7 @@ public interface IServiceOrderService extends IService<ServiceOrder> {
     void payNotify(String orderNum, String tradeNo);
 
     /**
-     * 完成订单
+     * 完成订单（订单完成后该笔订单分佣进入冻结金额，待完成三天后转入可提现金额）
      *
      * @param orderDoneReq 支付订单参数
      */

@@ -16,13 +16,13 @@ import java.util.Date;
  * @date : 2024/5/19 11:14 下午
  */
 @Data
-@TableName(value = "cash_withdrawa")
+@TableName(value = "cash_withdraw")
 public class CashWithdraw implements Serializable {
 
     /**
      * 主键
      */
-    @TableId(type = IdType.ASSIGN_ID)
+    @TableId(type = IdType.AUTO)
     private Long id;
     /**
      * 用户ID
@@ -31,7 +31,7 @@ public class CashWithdraw implements Serializable {
     /**
      * 银行卡号
      */
-    private String bankNo;
+    private String bankCard;
     /**
      * 银行类型
      */

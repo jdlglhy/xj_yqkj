@@ -29,5 +29,4 @@ public interface ICashWdService extends IService<CashWithdraw> {
      * @param page 提现申请记录
      */
     PageResDomain<CashWdInfoResp> cashPageRecord(CashWdPageReq page);
-
 }

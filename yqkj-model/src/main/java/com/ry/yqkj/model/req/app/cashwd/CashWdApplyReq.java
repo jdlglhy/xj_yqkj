@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -19,7 +20,7 @@ public class CashWdApplyReq implements Serializable {
      * 银行卡号
      */
     @NotBlank(message = "银行卡号不能为空")
-    private String bankNo;
+    private String bankCard;
     /**
      * 银行类型
      */
@@ -39,7 +40,7 @@ public class CashWdApplyReq implements Serializable {
     /**
      * 提现金额
      */
-    @NotBlank(message = "提现金额不能为空")
+    @NotNull(message = "提现金额不能为空")
     @DecimalMin(value = "0", inclusive = false, message = "提现金额必须大于0")
     private BigDecimal amount;
 }

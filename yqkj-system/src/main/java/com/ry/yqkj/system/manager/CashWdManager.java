@@ -1,7 +1,7 @@
 package com.ry.yqkj.system.manager;
 
 import com.ry.yqkj.common.core.page.PageResDomain;
-import com.ry.yqkj.model.req.web.cashwd.WebCashWdExamineReq;
+import com.ry.yqkj.model.req.web.CommonExamReq;
 import com.ry.yqkj.model.req.web.cashwd.WebCashWdPageReq;
 import com.ry.yqkj.model.resp.web.cashwd.WebCashWdPageResp;
 
@@ -15,9 +15,9 @@ public interface CashWdManager {
     /**
      * 提现审核
      *
-     * @param cashWdExamineReq 转账请求参数
+     * @param commonExamReq 转账请求参数
      */
-    void examine(WebCashWdExamineReq cashWdExamineReq);
+    void examine(CommonExamReq commonExamReq);
 
 
     /**
@@ -27,6 +27,4 @@ public interface CashWdManager {
      * @return 提现列表
      */
     PageResDomain<WebCashWdPageResp> page(WebCashWdPageReq webCashWdPageReq);
-
-
 }

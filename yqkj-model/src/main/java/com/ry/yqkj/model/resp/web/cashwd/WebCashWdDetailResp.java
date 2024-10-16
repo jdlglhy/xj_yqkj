@@ -1,4 +1,4 @@
-package com.ry.yqkj.model.resp.app.cashwd;
+package com.ry.yqkj.model.resp.web.cashwd;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -9,13 +9,16 @@ import java.util.Date;
 
 /**
  * @author : lihy
- * @Description : 提现详情
+ * @Description : 提现管理
  * @date : 2024/5/19 11:14 下午
  */
 @Data
-public class CashWdInfoResp implements Serializable {
+public class WebCashWdDetailResp implements Serializable {
 
-    private static final long serialVersionUID = -1L;
+    /**
+     * 用户ID
+     */
+    private Long accountId;
     /**
      * 银行卡号
      */
