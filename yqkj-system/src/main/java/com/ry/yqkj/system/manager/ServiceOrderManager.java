@@ -9,6 +9,5 @@ import com.ry.yqkj.system.domain.ServiceOrder;
  * @date : 2024/5/19 11:14 下午
  */
 public interface ServiceOrderManager extends IService<ServiceOrder> {
-
     
 }

@@ -134,6 +134,11 @@ public class ServiceOrder implements Serializable {
     private Date finishTime;
 
     /**
+     * 是否归档（分佣完成后编程归档） 0 = 未归档 1= 归档
+     */
+    private Integer isArchive;
+
+    /**
      * 创建时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
