@@ -97,7 +97,7 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
             BigDecimal reserveDur = orderReq.getReserveDur();
             //助教费用
             BigDecimal assistTotal = price.multiply(reserveDur);
-            if(orderReq.getTaxFee() != null){
+            if (orderReq.getTaxFee() != null) {
                 assistTotal = assistTotal.add(orderReq.getTaxFee());
             }
             //总费用
@@ -122,9 +122,9 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
             }
             serviceOrder.setCategory("助教订单");
             this.baseMapper.insert(serviceOrder);
+            //发送消息
+            wxMsgTemplateComponent.sendNewOrderMsg(serviceOrder);
         }
-        //模版消息发送
-        //wxMsgTemplateComponent.sendWxTemplateMessage(cliUserId);
     }
 
     @Override
@@ -273,6 +273,9 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         }
         serviceOrder.setInviteStatus(inviteReq.getInviteStatus());
         updateById(serviceOrder);
+        if (InviteStatusEnum.RECEIVED.code.equals(serviceOrder.getInviteStatus())) {
+            wxMsgTemplateComponent.sendPayOrderMsg(serviceOrder);
+        }
     }
 
     @Override
