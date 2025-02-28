@@ -36,6 +36,10 @@ public class WxUser implements Serializable {
      */
     private String sessionKey;
     /**
+     * 手机号
+     */
+    private String phone;
+    /**
      * 创建时间
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

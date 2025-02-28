@@ -16,18 +16,31 @@ import com.ry.yqkj.model.enums.InviteStatusEnum;
 import com.ry.yqkj.model.enums.ModulePreFixEnum;
 import com.ry.yqkj.model.enums.OrderStatusEnum;
 import com.ry.yqkj.model.enums.TradeStatusEnum;
-import com.ry.yqkj.model.req.app.order.*;
+import com.ry.yqkj.model.req.app.order.OrderCancelReq;
+import com.ry.yqkj.model.req.app.order.OrderDoneReq;
+import com.ry.yqkj.model.req.app.order.OrderInviteReq;
+import com.ry.yqkj.model.req.app.order.OrderReq;
+import com.ry.yqkj.model.req.app.order.OrderServiceStartReq;
 import com.ry.yqkj.model.resp.app.assist.AssistEvalResp;
 import com.ry.yqkj.model.resp.app.assist.OrderPageReq;
 import com.ry.yqkj.model.resp.app.cliuser.OrderEvalResp;
 import com.ry.yqkj.model.resp.app.order.OrderDetailResp;
 import com.ry.yqkj.model.resp.app.order.OrderSimpleResp;
 import com.ry.yqkj.system.component.AssistComponent;
-import com.ry.yqkj.system.component.WxMsgTemplateComponent;
+import com.ry.yqkj.system.component.MsgTemplateComponent;
 import com.ry.yqkj.system.component.WxPayComponent;
-import com.ry.yqkj.system.domain.*;
+import com.ry.yqkj.system.domain.Assistant;
+import com.ry.yqkj.system.domain.Fund;
+import com.ry.yqkj.system.domain.ServiceOrder;
+import com.ry.yqkj.system.domain.Trade;
+import com.ry.yqkj.system.domain.WxUser;
 import com.ry.yqkj.system.mapper.app.ServiceOrderMapper;
-import com.ry.yqkj.system.service.*;
+import com.ry.yqkj.system.service.IAssistantService;
+import com.ry.yqkj.system.service.IFundService;
+import com.ry.yqkj.system.service.IOrderEvalService;
+import com.ry.yqkj.system.service.IServiceOrderService;
+import com.ry.yqkj.system.service.ITradeService;
+import com.ry.yqkj.system.service.IWxUserService;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayWithRequestPaymentResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.Lists;
@@ -38,7 +51,11 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -73,7 +90,7 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
     private IOrderEvalService orderEvalService;
 
     @Resource
-    private WxMsgTemplateComponent wxMsgTemplateComponent;
+    private MsgTemplateComponent msgTemplateComponent;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -123,7 +140,7 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
             serviceOrder.setCategory("助教订单");
             this.baseMapper.insert(serviceOrder);
             //发送消息
-            wxMsgTemplateComponent.sendNewOrderMsg(serviceOrder);
+            msgTemplateComponent.sendNewOrderMsg(serviceOrder);
         }
     }
 
@@ -201,6 +218,9 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         }
         trade.setStatus(TradeStatusEnum.DONE.code);
         tradeService.updateById(trade);
+
+        //用户完成支付，给助教发送短信提醒
+        msgTemplateComponent.sendPayDoneOrderSmsMsg(serviceOrder);
     }
 
     @Override
@@ -274,7 +294,7 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         serviceOrder.setInviteStatus(inviteReq.getInviteStatus());
         updateById(serviceOrder);
         if (InviteStatusEnum.RECEIVED.code.equals(serviceOrder.getInviteStatus())) {
-            wxMsgTemplateComponent.sendPayOrderMsg(serviceOrder);
+            msgTemplateComponent.sendPayOrderMsg(serviceOrder);
         }
     }
 

@@ -7,7 +7,7 @@ import com.ry.yqkj.common.core.domain.model.CodeSessionModel;
 import com.ry.yqkj.common.utils.DozerUtil;
 import com.ry.yqkj.model.req.app.WxAuthorizeReq;
 import com.ry.yqkj.model.resp.CodeSessionResp;
-import com.ry.yqkj.system.component.WxMsgTemplateComponent;
+import com.ry.yqkj.system.component.MsgTemplateComponent;
 import com.ry.yqkj.system.component.WxPayComponent;
 import com.ry.yqkj.system.service.IServiceOrderService;
 import com.ry.yqkj.system.service.IWxUserService;
@@ -71,12 +71,12 @@ public class WxApiController extends BaseController {
     }
 
     @Resource
-    private WxMsgTemplateComponent wxMsgTemplateComponent;
+    private MsgTemplateComponent msgTemplateComponent;
 
-    @PostMapping("/send")
-    @ApiOperation("测试消息发送")
-    public R<Void> send() {
-        wxMsgTemplateComponent.sendPayOrderMsgTest();
-        return R.ok();
-    }
+//    @PostMapping("/send")
+//    @ApiOperation("测试消息发送")
+//    public R<Void> send() {
+//        msgTemplateComponent.sendPayOrderMsgTest();
+//        return R.ok();
+//    }
 }
