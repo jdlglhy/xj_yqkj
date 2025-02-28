@@ -76,7 +76,7 @@ public class WxApiController extends BaseController {
     @PostMapping("/send")
     @ApiOperation("测试消息发送")
     public R<Void> send() {
-        wxMsgTemplateComponent.sendWxTemplateMessage(null);
+        wxMsgTemplateComponent.sendPayOrderMsgTest();
         return R.ok();
     }
 }
