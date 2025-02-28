@@ -18,10 +18,6 @@ public class MsgConstants {
 
     public static final String sign = "清台挑战";
 
-    public static final String ACCESSKEY_ID = "LTAI5tAPUrfdeB28vepggKeK";
-
-    public static final String ACCESSKEY_SECRET = "EOYxUWfh8PZu6k2uEPEWTeulLnhMh9";
-
     /**
      * 提醒助教用户支付完成（短信模版）
      */
