@@ -1,10 +1,12 @@
 package com.ry.yqkj.controller.app;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.google.common.collect.Lists;
 import com.ry.yqkj.common.core.controller.BaseController;
 import com.ry.yqkj.common.core.domain.R;
 import com.ry.yqkj.common.core.domain.model.CodeSessionModel;
 import com.ry.yqkj.common.utils.DozerUtil;
+import com.ry.yqkj.model.req.app.TransferRequest;
 import com.ry.yqkj.model.req.app.WxAuthorizeReq;
 import com.ry.yqkj.model.resp.CodeSessionResp;
 import com.ry.yqkj.system.component.MsgTemplateComponent;
@@ -15,6 +17,7 @@ import com.wechat.pay.java.service.partnerpayments.app.model.Transaction;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * @author : lihy
@@ -79,4 +83,27 @@ public class WxApiController extends BaseController {
 //        msgTemplateComponent.sendPayOrderMsgTest();
 //        return R.ok();
 //    }
+
+    @GetMapping("/transfer")
+    @ApiOperation("转账测试")
+    public R<Void> testTransfer() throws Exception {
+        TransferRequest request = new TransferRequest();
+        request.setOutBatchNo("20250301221122");
+        request.setBatchName("佣金收入");
+        request.setBatchRemark("佣金收入2");
+        request.setTotalNum(1);
+        // 单位：分
+        request.setTotalAmount(10);
+        List<TransferRequest.TransferDetail> detailList = Lists.newArrayList();
+        TransferRequest.TransferDetail detail = new TransferRequest.TransferDetail();
+        detail.setOutDetailNo("20250301221122-1");
+        detail.setTransferAmount(10);
+        detail.setOpenid("otQEg7eeTizl9qZG3NMgnrEh5XhI");
+        detail.setTransferRemark("佣金收入3");
+        detailList.add(detail);
+        request.setTransferDetailList(detailList);
+        String data = wxPayComponent.transferToBalance("otQEg7eeTizl9qZG3NMgnrEh5XhI",10,"转账test");
+        logger.info("testTransfer data={}",data);
+        return R.ok();
+    }
 }
