@@ -4,6 +4,7 @@ import com.ry.yqkj.common.annotation.RepeatSubmit;
 import com.ry.yqkj.common.core.controller.WxBaseController;
 import com.ry.yqkj.common.core.domain.R;
 import com.ry.yqkj.common.core.page.PageResDomain;
+import com.ry.yqkj.model.req.app.order.OrderDoneReq;
 import com.ry.yqkj.model.req.app.order.OrderInviteReq;
 import com.ry.yqkj.model.req.app.order.OrderServiceStartReq;
 import com.ry.yqkj.model.resp.app.assist.OrderPageReq;
@@ -54,6 +55,14 @@ public class ServiceOrderController extends WxBaseController {
     @RepeatSubmit
     public R<Void> serviceStart(@Validated @RequestBody OrderServiceStartReq serviceStartReq) {
         serviceOrderService.orderServiceStart(serviceStartReq);
+        return R.ok();
+    }
+
+    @PostMapping("/assist/order/service_done")
+    @ApiOperation("服务完成")
+    @RepeatSubmit
+    public R<Void> serviceEnd(@Validated @RequestBody OrderDoneReq orderDoneReq) {
+        serviceOrderService.done(orderDoneReq);
         return R.ok();
     }
 }
