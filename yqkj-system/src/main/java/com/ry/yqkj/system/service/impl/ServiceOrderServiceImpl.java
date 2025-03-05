@@ -219,6 +219,15 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         trade.setStatus(TradeStatusEnum.DONE.code);
         tradeService.updateById(trade);
 
+        Assistant assistant = assistantService.getById(serviceOrder.getAssistId());
+        //本单收入计入冻结金额,此处需要锁
+        Fund fund = fundService.createFund(assistant.getCliUserId());
+        BigDecimal freezeAmount = fund.getFreezeAmount();
+        BigDecimal income = serviceOrder.getTotalAmount().multiply(serviceOrder.getRate());
+        freezeAmount = freezeAmount.add(income);
+        fund.setFreezeAmount(freezeAmount);
+        fund.setTotalAmount(freezeAmount.add(fund.getWithdrawAmount()));
+        fundService.updateById(fund);
         //用户完成支付，给助教发送短信提醒
         msgTemplateComponent.sendPayDoneOrderSmsMsg(serviceOrder);
     }
@@ -244,10 +253,10 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
             //TODO 后期修改通过提成规则获取比例
             //本次入账金额
             BigDecimal income = serviceOrder.getTotalAmount().multiply(serviceOrder.getRate());
-            freezeAmount = freezeAmount.add(income);
-//            withdrawAmount = withdrawAmount.add(income);
+            freezeAmount = freezeAmount.subtract(income);
+            withdrawAmount = withdrawAmount.add(income);
             fund.setFreezeAmount(freezeAmount);
-//            fund.setWithdrawAmount(withdrawAmount);
+            fund.setWithdrawAmount(withdrawAmount);
             fundService.updateById(fund);
         }
     }
