@@ -84,7 +84,7 @@ public class WxApiController extends BaseController {
 //        return R.ok();
 //    }
 
-    @GetMapping("/transfer")
+    @PostMapping("/transfer")
     @ApiOperation("转账测试")
     public R<Void> testTransfer() throws Exception {
         TransferRequest request = new TransferRequest();
@@ -103,7 +103,7 @@ public class WxApiController extends BaseController {
         detailList.add(detail);
         request.setTransferDetailList(detailList);
         String data = wxPayComponent.transferToBalance("otQEg7eeTizl9qZG3NMgnrEh5XhI",10,"转账test");
-        logger.info("testTransfer data={}",data);
+        logger.info("resp={}",data);
         return R.ok();
     }
 }

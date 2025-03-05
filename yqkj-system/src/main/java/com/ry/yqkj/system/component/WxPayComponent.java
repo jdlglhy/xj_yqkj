@@ -1,13 +1,15 @@
 package com.ry.yqkj.system.component;
 
-import com.alibaba.fastjson2.util.UUIDUtils;
+import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ry.yqkj.common.config.wxpay.WxPayConfigProperties;
 import com.ry.yqkj.common.utils.uuid.UUID;
 import com.ry.yqkj.model.req.app.TransferRequest;
+import com.ry.yqkj.model.req.app.TransferV2Request;
 import com.ry.yqkj.system.domain.ServiceOrder;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.core.notification.NotificationParser;
+import com.wechat.pay.java.core.util.NonceUtil;
 import com.wechat.pay.java.service.partnerpayments.app.model.Transaction;
 import com.wechat.pay.java.service.payments.jsapi.JsapiServiceExtension;
 import com.wechat.pay.java.service.payments.jsapi.model.Amount;
@@ -15,8 +17,13 @@ import com.wechat.pay.java.service.payments.jsapi.model.Payer;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayRequest;
 import com.wechat.pay.java.service.payments.jsapi.model.PrepayWithRequestPaymentResponse;
 import com.wechat.pay.java.service.refund.RefundService;
+import com.wechat.pay.java.service.transferbatch.TransferBatchService;
+import com.wechat.pay.java.service.transferbatch.model.InitiateBatchTransferRequest;
+import com.wechat.pay.java.service.transferbatch.model.InitiateBatchTransferResponse;
+import com.wechat.pay.java.service.transferbatch.model.TransferDetailInput;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.Lists;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.entity.StringEntity;
@@ -39,8 +46,14 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyFactory;
 import java.security.KeyStore;
+import java.security.PrivateKey;
+import java.security.Signature;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 /**
  * 微信小程序交易相关组件 copy from https://www.cnblogs.com/yanpeng19940119/p/17693895.html
@@ -52,8 +65,9 @@ import java.util.Base64;
 public class WxPayComponent {
 
 
-    private static final String TRANSFER_URL = "https://api.mch.weixin.qq.com/v3/transfer/batches";
+    //private static final String TRANSFER_URL = "https://api.mch.weixin.qq.com/v3/transfer/batches";
 
+    private static final String TRANSFER_URL = "https://api.mch.weixin.qq.com/v3/fund-app/mch-transfer/transfer-bills";
     @Resource
     private WxPayConfigProperties wxPayConfigProperties;
 
@@ -61,6 +75,10 @@ public class WxPayComponent {
     private RSAAutoCertificateConfig config;
     private JsapiServiceExtension service;
     private RefundService backService;
+
+    @Getter
+    private String privateKey;
+
     @Getter
     private CloseableHttpClient closeableHttpClient;
 
@@ -88,7 +106,7 @@ public class WxPayComponent {
     }
 
     private void initConfig() throws Exception {
-        String privateKey = this.loadKeyByResource("wechatPay/apiclient_key.pem");
+        privateKey = this.loadKeyByResource("wechatPay/apiclient_key.pem");
         if (config == null) {
             config = new RSAAutoCertificateConfig.Builder()
                     .merchantId(wxPayConfigProperties.getMchId())
@@ -97,6 +115,27 @@ public class WxPayComponent {
                     .apiV3Key(wxPayConfigProperties.getApiV3Key())
                     .build();
         }
+    }
+
+    public void transfer(String openId, Long amount, String remark) {
+        TransferBatchService transferBatchService = new TransferBatchService.Builder().config(config).build();
+        InitiateBatchTransferRequest request = new InitiateBatchTransferRequest();
+        request.setAppid(wxPayConfigProperties.getAppId());
+        request.setOutBatchNo(NonceUtil.createNonce(18));
+        request.setTotalAmount(amount);
+        request.setBatchName(remark);
+        request.setBatchRemark(remark);
+        request.setTotalNum(1);
+        List<TransferDetailInput> transferDetailList = new ArrayList();
+        TransferDetailInput transferDetailInput = new TransferDetailInput();
+        transferDetailInput.setOpenid(openId);
+        transferDetailInput.setOutDetailNo(NonceUtil.createNonce(18));
+        transferDetailInput.setTransferAmount(amount);
+        transferDetailInput.setTransferRemark(remark);
+        transferDetailList.add(transferDetailInput);
+        request.setTransferDetailList(transferDetailList);
+        InitiateBatchTransferResponse response = transferBatchService.initiateBatchTransfer(request);
+        log.info("response={}", response);
     }
 
     /**
@@ -108,10 +147,13 @@ public class WxPayComponent {
     private void initCreateHttpClient() throws Exception {
         // 证书路径
         //File certFile = new File("classpath:wechatPay/apiclient_cert.p12");
+        //File certFile = new File(WxPayComponent.class.getClassLoader().getResource("wechatPay/apiclient_cert.p12").getFile());
         ClassPathResource resource = new ClassPathResource("wechatPay/apiclient_cert.p12");
         // 加载证书
         KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        keyStore.load(resource.getInputStream(), wxPayConfigProperties.getMchId().toCharArray());
+        //try (FileInputStream instream = new FileInputStream(certFile)) {
+        keyStore.load(resource.getInputStream(), wxPayConfigProperties.getMchId().toCharArray()); // 使用商户号作为证书密码
+        //}
         // 构建SSLContext
         SSLContext sslContext = SSLContexts.custom()
                 .loadKeyMaterial(keyStore, wxPayConfigProperties.getMchId().toCharArray())
@@ -248,7 +290,7 @@ public class WxPayComponent {
         authorization.append("signature=\"").append(generateSignature(requestBody,
                 wxPayConfigProperties.getApiV3Key())).append("\",");
         authorization.append("nonce_str=\"").append(UUID.randomUUID()).append("\"");
-        log.info("authorization={}",authorization.toString());
+        log.info("authorization={}", authorization.toString());
 
 
         // 创建HTTP POST请求
@@ -257,7 +299,7 @@ public class WxPayComponent {
         httpPost.setHeader("Accept", "application/json");
         httpPost.setHeader("Authorization", authorization.toString());
         httpPost.setHeader("Accept", "application/json");
-        httpPost.setHeader("Wechatpay-Serial",wxPayConfigProperties.getSerialNo());
+        httpPost.setHeader("Wechatpay-Serial", wxPayConfigProperties.getSerialNo());
 
         // 发送请求
         CloseableHttpClient httpClient = this.getCloseableHttpClient();
@@ -302,24 +344,78 @@ public class WxPayComponent {
     /**
      * 生成微信支付 V3 签名
      *
-     * @param method     请求方法（如 "POST"）
-     * @param url        请求 URL（如 "/v3/transfer/batches"）
-     * @param timestamp  时间戳（秒级）
-     * @param nonce      随机字符串
-     * @param body       请求体（JSON 字符串）
-     * @param apiKey     商户 API 密钥
+     * @param method    请求方法（如 "POST"）
+     * @param url       请求 URL（如 "/v3/transfer/batches"）
+     * @param timestamp 时间戳（秒级）
+     * @param nonce     随机字符串
+     * @param body      请求体（JSON 字符串）
+     * @param apiKey    商户 API 密钥
      * @return 签名
      */
     private String generateSignature(String method, String url, String timestamp, String nonce, String body,
-                                String apiKey) throws Exception {
+                                     String apiKey) throws Exception {
         // 1. 构建签名数据
         String signatureData = buildSignatureData(method, url, timestamp, nonce, body);
+        log.info("签名参数：{}", signatureData);
 
-        // 2. 使用 HMAC-SHA256 加密
-        byte[] signatureBytes = hmacSha256(signatureData, apiKey);
+//        String priCont = privateKey.replace("-----BEGIN PRIVATE KEY-----", "")
+//                .replace("-----END PRIVATE KEY-----", "")
+//                .replaceAll("\\s+", "");
+//
+//        // 2. 使用 HMAC-SHA256 加密
+//        byte[] signatureBytes = hmacSha256(signatureData, priCont);
+//
+//        log.info("使用 HMAC-SHA256 加密后 = {}",new String(signatureBytes));
+//
+//        // 3. 返回 Base64 编码的签名
+//        String sign = Base64.getEncoder().encodeToString(signatureBytes);
+//        log.info("base64 = {}",sign);
+//        return sign;
+
+//        Signature signature = Signature.getInstance("SHA256withRSA");
+//        signature.initSign(apiKey);
+//        signature.update(signatureData.getBytes(StandardCharsets.UTF_8));
+//        byte[] signatureBytes = signature.sign();
+//
+//        // 3. 返回 Base64 编码的签名
+//        String sign = Base64.getEncoder().encodeToString(signatureBytes);
+//        log.info("base64 = {}", sign);
+
+
+//        Signature signature = Signature.getInstance("SHA256withRSA");
+//        PrivateKey privateKey = loadPrivateKey(wxPayConfigProperties.getMchId());
+//        log.info("privateKey={}",privateKey);
+//        signature.initSign(loadPrivateKey(wxPayConfigProperties.getMchId()));
+//        signature.update(signatureData.getBytes(StandardCharsets.UTF_8));
+//        byte[] signBytes = signature.sign();
+//        return Base64.getEncoder().encodeToString(signBytes);
+
+
+   // 2. 使用 SHA-256 with RSA 加密
+        Signature sign = Signature.getInstance("SHA256withRSA");
+        sign.initSign(getPrivateKey(privateKey));
+        sign.update(signatureData.getBytes("utf-8"));
+
+        byte[] signatureBytes = sign.sign();
+
+        log.info("使用 SHA-256 with RSA 加密后 = {}", new String(signatureBytes));
 
         // 3. 返回 Base64 编码的签名
-        return Base64.getEncoder().encodeToString(signatureBytes);
+        String signBase64 = Base64.getEncoder().encodeToString(signatureBytes);
+        log.info("base64 = {}", signBase64);
+        return signBase64;
+    }
+
+    public static PrivateKey loadPrivateKey(String mchId) throws Exception {
+        // 1. 加载 .p12 文件
+        ClassPathResource resource = new ClassPathResource("wechatPay/apiclient_cert.p12");
+        // 2. 初始化 KeyStore
+        KeyStore keyStore = KeyStore.getInstance("PKCS12");
+        keyStore.load(resource.getInputStream(), mchId.toCharArray());
+
+        // 3. 获取私钥
+        String alias = keyStore.aliases().nextElement(); // 获取第一个别名
+        return (PrivateKey) keyStore.getKey(alias, mchId.toCharArray());
     }
 
     /**
@@ -333,8 +429,18 @@ public class WxPayComponent {
                 body + "\n";
     }
 
+    private PrivateKey getPrivateKey(String privateKey) throws Exception {
+        String privateKeyPEM = privateKey.replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "")
+                .replaceAll("\\s+", "");
+        byte[] keyBytes = Base64.getDecoder().decode(privateKeyPEM);
+        PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory kf = KeyFactory.getInstance("RSA");
+        return kf.generatePrivate(spec);
+    }
+
     /**
-     * 使用 HMAC-SHA256 加密
+     * 使用 HMAC-SHA256 加密123123
      */
     private static byte[] hmacSha256(String data, String key) throws Exception {
         Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
@@ -342,15 +448,18 @@ public class WxPayComponent {
         sha256_HMAC.init(secretKey);
         return sha256_HMAC.doFinal(data.getBytes(StandardCharsets.UTF_8));
     }
+
     public String transferToBalance(String openid, int amount, String desc) throws Exception {
         // 构建请求体
-        String requestBody = buildRequestBody(openid, amount, desc);
+        String requestBody = buildReqV4(openid, amount, desc);
+        log.info("requestBody={}",requestBody);
 
         // 生成签名
         String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
-        String nonce = UUID.randomUUID().toString();
-        String signature = this.generateSignature("POST", "/v3/transfer/batches", timestamp, nonce, requestBody,
+        String nonce = NonceUtil.createNonce(20);
+        String signature = this.generateSignature("POST", "/v3/fund-app/mch-transfer/transfer-bills", timestamp, nonce, requestBody,
                 wxPayConfigProperties.getApiV3Key());
+        log.info("signature={}", signature);
 
 //        StringBuilder authorization = new StringBuilder();
 //        authorization.append("WECHATPAY2-SHA256-RSA2048 ");
@@ -365,8 +474,8 @@ public class WxPayComponent {
         HttpPost httpPost = new HttpPost(TRANSFER_URL);
         httpPost.setHeader("Content-Type", "application/json");
         httpPost.setHeader("Accept", "application/json");
-//        httpPost.setHeader("Wechatpay-Serial",wxPayConfigProperties.getSerialNo());
-        String authHeader = buildAuthorizationHeader(timestamp,nonce,signature);
+        httpPost.setHeader("Wechatpay-Serial", wxPayConfigProperties.getSerialNo());
+        String authHeader = buildAuthorizationHeader(timestamp, nonce, signature);
         log.info(authHeader);
         httpPost.setHeader("Authorization", "WECHATPAY2-SHA256-RSA2048 " + authHeader);
         log.info(signature);
@@ -392,7 +501,62 @@ public class WxPayComponent {
                 "\"transfer_remark\": \"%s\"," +
                 "\"openid\": \"%s\"" +
                 "}]" +
-                "}", "wxf753d4d1f7dc8bfd", UUID.randomUUID().toString(), desc, amount, UUID.randomUUID().toString(), amount, desc, openid);
+                "}", "wxf753d4d1f7dc8bfd", NonceUtil.createNonce(16), desc, amount, NonceUtil.createNonce(16), amount, desc, openid);
+    }
+    private String buildRequestBodyV3(String openid, int amount, String desc) {
+
+
+
+        // 构建请求体 JSON
+        return String.format("{" +
+                "\"appid\": \"%s\"," +
+                "\"out_bill_no\": \"%s\"," +
+                "\"transfer_scene_id\": \"1005\"," +
+                "\"transfer_amount\": %d," +
+                "\"transfer_remark\": \"%s\"," +
+                "\"openid\": \"%s\"," +
+                "\"transfer_scene_report_infos\": [{" +
+                "\"info_type\": \"奖励说明\"," +
+                "\"info_content\": \"佣金收入\"" +
+                "}]" +
+
+                "}", "wxf753d4d1f7dc8bfd", NonceUtil.createNonce(16), amount,desc, openid);
+    }
+
+    private String buildReqV4(String openid, int amount, String desc){
+        List<TransferV2Request.transferSceneReportInfo> transferSceneReportInfos = Lists.newArrayList();
+        TransferV2Request.transferSceneReportInfo info = new TransferV2Request.transferSceneReportInfo();
+        info.setInfoType("岗位类型");
+        info.setInfoContent("助教");
+
+        TransferV2Request.transferSceneReportInfo info2 = new TransferV2Request.transferSceneReportInfo();
+        info2.setInfoType("报酬说明");
+        info2.setInfoContent("助教订单收入");
+
+        TransferV2Request.transferSceneReportInfo info3 = new TransferV2Request.transferSceneReportInfo();
+        info3.setInfoType("企业补贴");
+        info3.setInfoContent("企业补贴2");
+
+        TransferV2Request.transferSceneReportInfo info4 = new TransferV2Request.transferSceneReportInfo();
+        info4.setInfoType("开工利是");
+        info4.setInfoContent("开工利是3");
+
+        transferSceneReportInfos.add(info);
+        transferSceneReportInfos.add(info2);
+//        transferSceneReportInfos.add(info3);
+//        transferSceneReportInfos.add(info4);
+
+
+        TransferV2Request request = new TransferV2Request();
+        request.setAppId("wxf753d4d1f7dc8bfd");
+        request.setOpenId(openid);
+        request.setTransferAmount(amount);
+        request.setTransferRemark(desc);
+        request.setTransferSceneId("1005");
+        request.setOutBillNo(NonceUtil.createNonce(16));
+        //request.setUserRecvPerception("劳务报酬");
+        request.setTransferSceneReportInfos(transferSceneReportInfos);
+        return JSON.toJSONString(request);
     }
 
     /**
