@@ -239,26 +239,6 @@ public class WxPayComponent {
         // 调用接口
         return service.prepayWithRequestPayment(request);
     }
-
-
-    public void handleCallback(HttpServletRequest request, HttpServletResponse response) throws Exception {
-        String callbackData = getRequestBody(request);
-        // 验证签名
-        if (verifySignature(callbackData, request.getHeader("Wechatpay-Signature"), privateKey)) {
-            // 处理回调逻辑
-            // 解析callbackData，更新订单状态等
-            response.setStatus(HttpServletResponse.SC_OK);
-        } else {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-        }
-    }
-
-//    public static boolean verifySignature(String data, String signature, String privateKey) throws Exception {
-//        String expectedSignature = generateSignature(data, privateKey);
-//        return expectedSignature.equals(signature);
-//    }
-
-
     public static boolean verifySignature(String data, String signature, String certPath) throws Exception {
         // Load the certificate
         CertificateFactory factory = CertificateFactory.getInstance("X.509");

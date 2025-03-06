@@ -61,6 +61,11 @@ public class CashWdInfoResp implements Serializable {
      * 状态：processing = 处理中、done = 完成、expired = 已失效
      */
     private String status;
+
+    /**
+     * 微信转账状态
+     */
+    private String notifyState;
     /**
      * 创建时间
      */

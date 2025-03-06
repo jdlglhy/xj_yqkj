@@ -1,6 +1,7 @@
 package com.ry.yqkj.system.service.impl;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -13,10 +14,11 @@ import com.ry.yqkj.common.utils.mp.search.SearchTool;
 import com.ry.yqkj.common.utils.uuid.SnowflakeIdUtil;
 import com.ry.yqkj.model.enums.ModulePreFixEnum;
 import com.ry.yqkj.model.enums.TradeStatusEnum;
-import com.ry.yqkj.model.req.app.cashwd.CashWdReq;
 import com.ry.yqkj.model.req.app.cashwd.CashWdPageReq;
+import com.ry.yqkj.model.req.app.cashwd.CashWdReq;
 import com.ry.yqkj.model.resp.app.cashwd.CashWdInfoResp;
 import com.ry.yqkj.model.resp.app.cashwd.TransferBalanceResp;
+import com.ry.yqkj.model.resp.app.cashwd.TransferNotifyResp;
 import com.ry.yqkj.system.component.AssistComponent;
 import com.ry.yqkj.system.component.WxPayComponent;
 import com.ry.yqkj.system.domain.CashWithdraw;
@@ -91,6 +93,7 @@ public class CashWdServiceImpl extends ServiceImpl<CashWdMapper, CashWithdraw> i
         TransferBalanceResp resp = wxPayComponent.transferToBalance(wxUser.getOpenId(), cashWithdraw.getWithdrawNo(), cashWithdraw.getAmount(), "用户提现");
         cashWithdraw.setPackageInfo(JSON.toJSONString(resp));
         cashWithdraw.setTransferBillNo(resp.getTransferBillNo());
+        cashWithdraw.setNotifyState(resp.getState());
         this.updateById(cashWithdraw);
         log.info("商家转账到零钱接口返回结果：cliUserId={},resp={}", cliUserId, resp);
         if (StringUtils.isBlank(resp.getPackageInfo())) {
@@ -103,8 +106,53 @@ public class CashWdServiceImpl extends ServiceImpl<CashWdMapper, CashWithdraw> i
     public PageResDomain<CashWdInfoResp> cashPageRecord(CashWdPageReq cashWdPageReq) {
         Page<CashWithdraw> page = new Page<>(cashWdPageReq.getCurrent(), cashWdPageReq.getPageSize());
         QueryWrapper<CashWithdraw> queryWrapper = SearchTool.invoke(cashWdPageReq);
-        queryWrapper.lambda().orderByDesc(CashWithdraw::getAmount);
+        queryWrapper.lambda().eq(CashWithdraw::getAccountId, WxUserUtils.current().getUserId());
+        queryWrapper.lambda().orderByDesc(CashWithdraw::getCreateTime);
         page = cashWdMapper.selectPage(page, queryWrapper);
         return PageResDomain.parse(page, CashWdInfoResp.class);
+    }
+
+    @Override
+    public TransferBalanceResp getUserConfirmPackage(Long id) {
+        CashWithdraw cashWithdraw = this.getById(id);
+        if ("WAIT_USER_CONFIRM".equals(cashWithdraw.getNotifyState()) || "TRANSFERING".equals(cashWithdraw.getNotifyState())) {
+            return JSONObject.parseObject(cashWithdraw.getPackageInfo(), TransferBalanceResp.class);
+        }
+        return null;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void notifySuccess(TransferNotifyResp resp) {
+        String outBillNo = resp.getOutBillNo();
+        CashWithdraw cashWithdraw = this.getOne(new QueryWrapper<CashWithdraw>().lambda().eq(CashWithdraw::getWithdrawNo, outBillNo));
+        if (cashWithdraw == null) {
+            log.info("找不到对应的提现单：{}", outBillNo);
+            return;
+        }
+        if ("SUCCESS".equals(resp.getState())) {
+            cashWithdraw.setNotifyState(resp.getState());
+            cashWithdraw.setStatus(TradeStatusEnum.DONE.code);
+            Fund fund = fundService.createFund(cashWithdraw.getAccountId());
+            synchronized (fund) {
+                //冻结金额扣除
+                fund.setFreezeAmount(fund.getFreezeAmount().subtract(cashWithdraw.getAmount()));
+                fund.setTotalAmount(fund.getWithdrawAmount().add(fund.getFreezeAmount()));
+                fundService.updateById(fund);
+            }
+            return;
+        }
+        if ("FAIL".equals(resp.getState()) || "CANCELLED".equals(resp.getState())) {
+            cashWithdraw.setNotifyState(resp.getState());
+            cashWithdraw.setStatus(TradeStatusEnum.EXPIRED.code);
+            Fund fund = fundService.createFund(cashWithdraw.getAccountId());
+            synchronized (fund) {
+                //失效后冻结金额返回到可提现金额
+                fund.setFreezeAmount(fund.getFreezeAmount().subtract(cashWithdraw.getAmount()));
+                fund.setWithdrawAmount(fund.getWithdrawAmount().add(cashWithdraw.getAmount()));
+                fund.setTotalAmount(fund.getWithdrawAmount().add(fund.getFreezeAmount()));
+                fundService.updateById(fund);
+            }
+        }
     }
 }

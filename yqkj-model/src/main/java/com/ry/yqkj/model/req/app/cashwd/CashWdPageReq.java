@@ -15,22 +15,4 @@ public class CashWdPageReq extends PageReqDomain {
 
     private static final long serialVersionUID = -1L;
 
-    /**
-     * 收款方
-     */
-    @Search(type = SearchType.LIKE)
-    private String payee;
-
-    /**
-     * 手机号
-     */
-    @Search(type = SearchType.LIKE)
-    private String phone;
-
-    /**
-     * 银行卡号
-     */
-    @Search(type = SearchType.LIKE)
-    private String bankNo;
-
 }
