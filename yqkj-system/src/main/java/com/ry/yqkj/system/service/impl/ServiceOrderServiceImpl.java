@@ -243,9 +243,12 @@ public class ServiceOrderServiceImpl extends ServiceImpl<ServiceOrderMapper, Ser
         serviceOrder.setStatus(OrderStatusEnum.DONE.code);
         serviceOrder.setFinishTime(new Date());
         updateById(serviceOrder);
+
+        Assistant assistant = assistantService.getById(serviceOrder.getAssistId());
+
         synchronized (serviceOrder.getCliUserId()) {
             //TODO 订单完成后、订单收入金额 -> 可提现金额（提现设置7天可提现一次）
-            Fund fund = fundService.createFund(serviceOrder.getAssistId());
+            Fund fund = fundService.createFund(assistant.getCliUserId());
             //冻结金额
             BigDecimal freezeAmount = fund.getFreezeAmount();
             //可提现金额

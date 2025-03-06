@@ -1,6 +1,5 @@
 package com.ry.yqkj.system.manager.impl;
 
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -10,6 +9,7 @@ import com.ry.yqkj.common.utils.SecurityUtils;
 import com.ry.yqkj.common.utils.StringUtils;
 import com.ry.yqkj.common.utils.mp.search.SearchTool;
 import com.ry.yqkj.model.enums.ApproveEnum;
+import com.ry.yqkj.model.enums.TradeStatusEnum;
 import com.ry.yqkj.model.req.web.CommonExamReq;
 import com.ry.yqkj.model.req.web.cashwd.WebCashWdPageReq;
 import com.ry.yqkj.model.resp.web.cashwd.WebCashWdPageResp;
@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 import java.util.Date;
 
 /**
@@ -61,14 +62,11 @@ public class CashWdManagerImpl implements CashWdManager {
             cashWithdraw.setStatus(ApproveEnum.REFUSED.code);
             cashWithdraw.setModifyBy("系统_" + SecurityUtils.getUserId());
             cashWithdraw.setModifyTime(new Date());
-            if (StringUtils.isNotEmpty(req.getAttachList())) {
-                cashWithdraw.setAttach(StringUtils.join(req.getAttachList(), ","));
-            }
             cashWdService.updateById(cashWithdraw);
 
-            //更新账户余额
             Fund fund = fundService.createFund(cashWithdraw.getAccountId());
             synchronized (fund) {
+                //每次提现会将可提现金额转入到冻结金额
                 fund.setWithdrawAmount(fund.getWithdrawAmount().add(cashWithdraw.getAmount()));
                 fund.setFreezeAmount(fund.getFreezeAmount().subtract(cashWithdraw.getAmount()));
                 fund.setModifyBy("系统_" + SecurityUtils.getUserId());
@@ -77,24 +75,24 @@ public class CashWdManagerImpl implements CashWdManager {
             }
             return;
         }
-        //通过，扣除冻结
+        //通过，再次验证金额，扣除冻结,审批通过-》处理中，发送短信，提醒用户确认收款
         if (ObjectUtil.equal(req.getApproveState(), ApproveEnum.APPROVED.code)) {
-            if (CollUtil.isEmpty(req.getAttachList())) {
-                throw new ServiceException("请上传交易凭证！");
-            }
-            cashWithdraw.setStatus(ApproveEnum.APPROVED.code);
-            cashWithdraw.setModifyBy("系统_" + SecurityUtils.getUserId());
-            cashWithdraw.setModifyTime(new Date());
-            cashWithdraw.setAttach(StringUtils.join(req.getAttachList(), ","));
-            cashWdService.updateById(cashWithdraw);
             //更新账户余额
             Fund fund = fundService.createFund(cashWithdraw.getAccountId());
-            synchronized (fund) {
-                fund.setFreezeAmount(fund.getFreezeAmount().subtract(cashWithdraw.getAmount()));
-                fund.setModifyBy("系统_" + SecurityUtils.getUserId());
-                fund.setModifyTime(new Date());
-                fundService.updateById(fund);
+            if (fund.getWithdrawAmount().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new ServiceException("可提现余额不足！");
             }
+            if (fund.getWithdrawAmount().compareTo(cashWithdraw.getAmount()) < 0) {
+                throw new ServiceException("可提现余额不足！");
+            }
+            cashWithdraw.setStatus(TradeStatusEnum.PROCESSING.code);
+            cashWithdraw.setModifyBy("系统_" + SecurityUtils.getUserId());
+            cashWithdraw.setModifyTime(new Date());
+            cashWdService.updateById(cashWithdraw);
+
+            //调用转账接口，并更新返回的package_info信息
+            //发送短信提醒用户收款 并待urlLink packageInfo参数，提醒用户点击进入小程序收款
+            // TODO: 2025/3/6
         }
     }
 

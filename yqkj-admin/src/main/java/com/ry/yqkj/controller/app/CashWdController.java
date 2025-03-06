@@ -4,9 +4,10 @@ import com.ry.yqkj.common.annotation.RepeatSubmit;
 import com.ry.yqkj.common.core.controller.WxBaseController;
 import com.ry.yqkj.common.core.domain.R;
 import com.ry.yqkj.common.core.page.PageResDomain;
-import com.ry.yqkj.model.req.app.cashwd.CashWdApplyReq;
+import com.ry.yqkj.model.req.app.cashwd.CashWdReq;
 import com.ry.yqkj.model.req.app.cashwd.CashWdPageReq;
 import com.ry.yqkj.model.resp.app.cashwd.CashWdInfoResp;
+import com.ry.yqkj.model.resp.app.cashwd.TransferBalanceResp;
 import com.ry.yqkj.system.service.ICashWdService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -34,8 +35,12 @@ public class CashWdController extends WxBaseController {
     @PostMapping("/cash_wd/apply")
     @ApiOperation("提现申请")
     @RepeatSubmit(interval = 1000, message = "请勿重复操作！")
-    public R<Void> apply(@Validated @RequestBody CashWdApplyReq req) {
-        cashWdService.cashWdApply(req);
+    public R<TransferBalanceResp> apply(@Validated @RequestBody CashWdReq req) {
+        try {
+            R.ok(cashWdService.cashWdApply(req));
+        } catch (Exception e) {
+            return R.fail("提现失败！");
+        }
         return R.ok();
     }
 

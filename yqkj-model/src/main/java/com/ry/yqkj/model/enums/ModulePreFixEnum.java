@@ -12,7 +12,8 @@ public enum ModulePreFixEnum {
 
     SERVICE_ORDER("SN", "服务订单号前缀"),
     REFUND("RN", "退款单"),
-    TRADE("TN", "交易流水");
+    TRADE("TN", "交易流水"),
+    WITH_DRAW("WD", "提现");
 
     ModulePreFixEnum(String code, String message) {
         this.code = code;

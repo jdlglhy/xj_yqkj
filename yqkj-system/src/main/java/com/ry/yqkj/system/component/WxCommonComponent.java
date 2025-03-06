@@ -1,10 +1,14 @@
 package com.ry.yqkj.system.component;
 
+import cn.binarywang.wx.miniapp.api.WxMaLinkService;
+import cn.binarywang.wx.miniapp.api.impl.WxMaLinkServiceImpl;
+import cn.binarywang.wx.miniapp.bean.urllink.GenerateUrlLinkRequest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ry.yqkj.common.core.domain.model.WxAppUser;
 import com.ry.yqkj.common.utils.WxUserUtils;
 import com.ry.yqkj.system.domain.WxUser;
+import com.ry.yqkj.system.helper.WxConfigHelper;
 import com.ry.yqkj.system.service.IWxUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -28,6 +32,8 @@ public class WxCommonComponent {
 
     @Resource
     private IWxUserService wxUserService;
+    @Resource
+    private WxConfigHelper wxConfigHelper;
 
     public String getWxPhone(String encryptedData, String iv) {
         WxAppUser wxAppUser = WxUserUtils.current();
@@ -66,5 +72,14 @@ public class WxCommonComponent {
         return new String(decryptedData, StandardCharsets.UTF_8);
     }
 
-
+    public String generateUrlLink() {
+        try {
+            WxMaLinkService wxMaLinkService = new WxMaLinkServiceImpl(WxConfigHelper.getWxMaService());
+            GenerateUrlLinkRequest request = new GenerateUrlLinkRequest();
+            return wxMaLinkService.generateUrlLink(request);
+        } catch (Exception e) {
+            log.error("生成小程序urlLink异常", e);
+        }
+        return "";
+    }
 }

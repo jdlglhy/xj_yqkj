@@ -24,41 +24,38 @@ public class CashWithdraw implements Serializable {
      */
     @TableId(type = IdType.AUTO)
     private Long id;
+
+    /**
+     * 提现单号
+     */
+    private String withdrawNo;
+
+    /**
+     * 外部账单号
+     */
+    private String transferBillNo;
+
     /**
      * 用户ID
      */
     private Long accountId;
-    /**
-     * 银行卡号
-     */
-    private String bankCard;
-    /**
-     * 银行类型
-     */
-    private String bankType;
-    /**
-     * 收款方
-     */
-    private String payee;
-    /**
-     * 手机号
-     */
-    private String phone;
 
     /**
      * 提现金额
      */
     private BigDecimal amount;
 
-    /**
-     * 转账凭证
-     */
-    private String attach;
 
     /**
      * 备注
      */
     private String remark;
+
+    /**
+     * package 信息（商家转账到零钱，拉起用户确认收款的package参数）
+     */
+    private String packageInfo;
+
 
     /**
      * 状态：processing = 处理中、done = 完成、expired = 已失效

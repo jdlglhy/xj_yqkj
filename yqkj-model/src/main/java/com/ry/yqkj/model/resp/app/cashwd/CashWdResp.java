@@ -1,11 +1,8 @@
 package com.ry.yqkj.model.resp.app.cashwd;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  * @author : lihy
@@ -17,22 +14,17 @@ public class CashWdResp implements Serializable {
 
     private static final long serialVersionUID = -1L;
     /**
-     * 提现金额
+     * package参数
      */
-    private BigDecimal amount;
+    private String packageInfo;
 
     /**
-     * 备注
+     * 商户号
      */
-    private String remark;
+    private String mchId;
 
     /**
-     * 状态：processing = 处理中、done = 完成、expired = 已失效
+     * appId
      */
-    private String status;
-    /**
-     * 提现时间
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private Date createTime;
+    private String appId;
 }

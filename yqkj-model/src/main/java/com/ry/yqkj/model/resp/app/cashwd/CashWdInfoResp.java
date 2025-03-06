@@ -1,5 +1,7 @@
 package com.ry.yqkj.model.resp.app.cashwd;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
@@ -16,37 +18,44 @@ import java.util.Date;
 public class CashWdInfoResp implements Serializable {
 
     private static final long serialVersionUID = -1L;
+
     /**
-     * 银行卡号
+     * 主键
      */
-    private String bankCard;
+    @TableId(type = IdType.AUTO)
+    private Long id;
+
     /**
-     * 银行类型
+     * 提现单号
      */
-    private String bankType;
+    private String withdrawNo;
+
     /**
-     * 收款方
+     * 外部账单号
      */
-    private String payee;
+    private String outBillNo;
+
     /**
-     * 手机号
+     * 用户ID
      */
-    private String phone;
+    private Long accountId;
 
     /**
      * 提现金额
      */
     private BigDecimal amount;
 
-    /**
-     * 转账凭证
-     */
-    private String attach;
 
     /**
      * 备注
      */
     private String remark;
+
+    /**
+     * package 信息（商家转账到零钱，拉起用户确认收款的package参数）
+     */
+    private String packageInfo;
+
 
     /**
      * 状态：processing = 处理中、done = 完成、expired = 已失效

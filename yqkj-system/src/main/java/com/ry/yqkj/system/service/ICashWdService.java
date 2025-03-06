@@ -2,9 +2,10 @@ package com.ry.yqkj.system.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.ry.yqkj.common.core.page.PageResDomain;
-import com.ry.yqkj.model.req.app.cashwd.CashWdApplyReq;
+import com.ry.yqkj.model.req.app.cashwd.CashWdReq;
 import com.ry.yqkj.model.req.app.cashwd.CashWdPageReq;
 import com.ry.yqkj.model.resp.app.cashwd.CashWdInfoResp;
+import com.ry.yqkj.model.resp.app.cashwd.TransferBalanceResp;
 import com.ry.yqkj.system.domain.CashWithdraw;
 
 /**
@@ -20,7 +21,7 @@ public interface ICashWdService extends IService<CashWithdraw> {
      *
      * @param req 提现申请参数
      */
-    void cashWdApply(CashWdApplyReq req);
+    TransferBalanceResp cashWdApply(CashWdReq req) throws Exception;
 
 
     /**
