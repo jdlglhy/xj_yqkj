@@ -16,7 +16,7 @@ public class MsgConstants {
     public static final String ORDER_PAY_NOTIFY_TM_ID = "tzNMYhIykUSkES8ejxqdymM4lCxIjpA3XqhgB4PRBtA";
 
 
-    public static final String sign = "清台挑战";
+    public static final String sign = "厦门天际星河科技";
 
     /**
      * 提醒助教用户支付完成（短信模版）

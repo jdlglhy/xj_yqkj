@@ -14,6 +14,7 @@ import com.ry.yqkj.model.resp.app.cashwd.TransferNotifyResp;
 import com.ry.yqkj.system.component.MsgTemplateComponent;
 import com.ry.yqkj.system.component.WxCommonComponent;
 import com.ry.yqkj.system.component.WxPayComponent;
+import com.ry.yqkj.system.domain.ServiceOrder;
 import com.ry.yqkj.system.service.ICashWdService;
 import com.ry.yqkj.system.service.IServiceOrderService;
 import com.ry.yqkj.system.service.IWxUserService;
@@ -127,5 +128,15 @@ public class WxApiController extends BaseController {
     @ApiOperation("生成小程序urlLink")
     public R<String> generateUrlLink() {
         return R.ok(wxCommonComponent.generateUrlLink());
+    }
+
+
+
+    @GetMapping("/send_msg")
+    @ApiOperation("发送短息")
+    public R<Void> sendMsg() {
+        ServiceOrder serviceOrder = serviceOrderService.getById(1899056138505207810L);
+        msgTemplateComponent.sendNewOrderSmsMsg(serviceOrder);
+        return R.ok();
     }
 }

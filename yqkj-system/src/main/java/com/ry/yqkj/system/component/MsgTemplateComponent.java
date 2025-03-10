@@ -104,7 +104,7 @@ public class MsgTemplateComponent {
             JSONObject json = new JSONObject();
             json.put("serviceTime", DateUtil.format(serviceOrder.getReserveTime(), "yyyy-MM-dd HH:mm"));
             json.put("hour", serviceOrder.getReserveDur().toString());
-            json.put("address", serviceOrder.getServiceAddress() + "" + serviceOrder.getBallRoomName());
+            json.put("address",serviceOrder.getBallRoomName());
             String phone = assistComponent.getPhoneByAssistId(serviceOrder.getAssistId());
             sendSmsMsg(MsgConstants.NEW_ORDER_REMIND_SMS_TM_ID, JSON.toJSONString(json), phone);
         } catch (Exception e) {
@@ -181,7 +181,7 @@ public class MsgTemplateComponent {
             json.put("orderNo", serviceOrder.getOrderNo());
             json.put("serviceTime", DateUtil.format(serviceOrder.getReserveTime(), "yyyy-MM-dd HH:mm"));
             json.put("hour", serviceOrder.getReserveDur().toString());
-            json.put("address", serviceOrder.getServiceAddress() + "" + serviceOrder.getBallRoomName());
+            json.put("address", serviceOrder.getBallRoomName());
             String phone = assistComponent.getPhoneByAssistId(serviceOrder.getAssistId());
             sendSmsMsg(MsgConstants.ORDER_PAY_DONE_SMS_TM_ID, JSON.toJSONString(json), phone);
         } catch (Exception e) {
@@ -226,7 +226,7 @@ public class MsgTemplateComponent {
         smsRequest.setSignName(MsgConstants.sign);
         try {
             SendSmsResponse sendSmsResponse = smsClient.sendSms(smsRequest);
-            log.info("sendSmsMsg success!phone={}", phone);
+            log.info("sendSmsMsg success!phone={}，resp={}", phone,JSON.toJSON(sendSmsResponse));
         } catch (Exception e) {
             log.error("sendSmsMsg error,phone = {},smsRequest={}", phone, smsRequest, e);
         }

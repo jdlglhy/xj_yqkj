@@ -232,7 +232,7 @@ public class WxPayComponent {
     public PrepayWithRequestPaymentResponse prepayWithRequestPayment(ServiceOrder serviceOrder, String openId) {
         PrepayRequest request = new PrepayRequest();
         Amount amount = new Amount();
-        serviceOrder.setTotalAmount(BigDecimal.valueOf(0.01));
+        serviceOrder.setTotalAmount(serviceOrder.getTotalAmount());
         //单位：分
         int totalAmount = (serviceOrder.getTotalAmount().multiply(new BigDecimal(100))).intValue();
         //支付金额
