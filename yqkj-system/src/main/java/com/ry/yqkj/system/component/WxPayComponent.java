@@ -8,6 +8,7 @@ import com.ry.yqkj.model.resp.app.cashwd.TransferBalanceResp;
 import com.ry.yqkj.model.resp.app.cashwd.TransferNotifyResp;
 import com.ry.yqkj.system.domain.ServiceOrder;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
+import com.wechat.pay.java.core.notification.Notification;
 import com.wechat.pay.java.core.notification.NotificationParser;
 import com.wechat.pay.java.core.notification.RequestParam;
 import com.wechat.pay.java.core.util.NonceUtil;
@@ -34,9 +35,11 @@ import org.springframework.util.FileCopyUtils;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.SSLContext;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -153,7 +156,7 @@ public class WxPayComponent {
      * @return
      * @throws IOException
      */
-    private static RequestParam buildRequestParam(HttpServletRequest request) throws IOException {
+    public RequestParam buildRequestParam(HttpServletRequest request) throws IOException {
         //获取报文
         StringBuilder buffer = new StringBuilder();
         BufferedReader reader = request.getReader();
@@ -199,9 +202,24 @@ public class WxPayComponent {
      * @param request
      * @throws Exception
      */
+//    public TransferNotifyResp notifyTransferParser(HttpServletRequest request) throws Exception {
+//        // 验签、解密并转换成 Transaction
+//        return notificationParser.parse(buildRequestParam(request), TransferNotifyResp.class);
+//    }
+
+
     public TransferNotifyResp notifyTransferParser(HttpServletRequest request) throws Exception {
+        RequestParam requestParam = buildRequestParam(request);
+        Notification notification = JSON.parseObject(requestParam.getBody(),Notification.class);
         // 验签、解密并转换成 Transaction
-        return notificationParser.parse(buildRequestParam(request), TransferNotifyResp.class);
+        byte[] aesKey = wxPayConfigProperties.getApiV3Key().getBytes();
+        Cipher cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        SecretKeySpec key = new SecretKeySpec(aesKey, "AES");
+        GCMParameterSpec spec = new GCMParameterSpec(128, notification.getResource().getNonce().getBytes());
+        cipher.init(Cipher.DECRYPT_MODE, key, spec);
+        cipher.updateAAD("mch_payment".getBytes());
+        String result = new String(cipher.doFinal(Base64.getDecoder().decode(notification.getResource().getCiphertext())), "utf-8");
+        return JSON.parseObject(result, TransferNotifyResp.class);
     }
 
     /**
@@ -239,7 +257,8 @@ public class WxPayComponent {
         // 调用接口
         return service.prepayWithRequestPayment(request);
     }
-    public static boolean verifySignature(String data, String signature, String certPath) throws Exception {
+
+    public boolean verifySignature(String data, String signature, String certPath) throws Exception {
         // Load the certificate
         CertificateFactory factory = CertificateFactory.getInstance("X.509");
         Certificate certificate;
@@ -276,23 +295,6 @@ public class WxPayComponent {
         String signBase64 = Base64.getEncoder().encodeToString(signatureBytes);
         log.info("base64 = {}", signBase64);
         return signBase64;
-    }
-
-    /**
-     * 验签
-     *
-     * @param data
-     * @param signature
-     * @return
-     * @throws Exception
-     */
-    public boolean verifySignature(String data, String signature) throws Exception {
-        // 2. 使用 SHA-256 with RSA 加密
-        Signature sign = Signature.getInstance("SHA256withRSA");
-        sign.initVerify(certificate);
-        sign.update(data.getBytes("utf-8"));
-        byte[] signatureBytes = Base64.getDecoder().decode(signature);
-        return sign.verify(signatureBytes);
     }
 
 
@@ -344,6 +346,7 @@ public class WxPayComponent {
 
         TransferV2Request request = new TransferV2Request();
         request.setAppId(wxPayConfigProperties.getAppId());
+        request.setNotifyUrl(wxPayConfigProperties.getConfirmNotifyUrl());
         request.setOpenId(openid);
         request.setTransferAmount(amount.multiply(new BigDecimal("100")).intValue());
         request.setTransferRemark(desc);
@@ -370,7 +373,7 @@ public class WxPayComponent {
     /**
      * 构建验签数据
      */
-    private static String buildCheckSignatureData(String timestamp, String nonce, String body) {
+    public String buildCheckSignatureData(String timestamp, String nonce, String body) {
         return timestamp + "\n" +
                 nonce + "\n" +
                 body + "\n";

@@ -31,7 +31,6 @@ import com.ry.yqkj.system.domain.AssistForm;
 import com.ry.yqkj.system.domain.Assistant;
 import com.ry.yqkj.system.domain.CliUser;
 import com.ry.yqkj.system.domain.CliUserAuth;
-import com.ry.yqkj.system.domain.WxUser;
 import com.ry.yqkj.system.mapper.app.AssistFormMapper;
 import com.ry.yqkj.system.mapper.app.AssistantMapper;
 import com.ry.yqkj.system.service.IAssistantService;
@@ -202,7 +201,9 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
         Page<Assistant> page = new Page<>(assistPageReq.getCurrent(), assistPageReq.getPageSize());
         QueryWrapper<Assistant> queryWrapper = SearchTool.invoke(assistPageReq);
         Assistant assistant = assistComponent.currentUserToAssistant();
-        queryWrapper.lambda().ne(assistant != null,Assistant::getId,assistant.getId());
+        if (assistant != null) {
+            queryWrapper.lambda().ne(Assistant::getId, assistant.getId());
+        }
         page = assistantMapper.selectPage(page, queryWrapper);
         return PageResDomain.parse(page, AssistInfoResp.class);
     }
@@ -231,7 +232,7 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
 
         WxAppUser wxUser = WxUserUtils.current();
         Assistant assistant = assistComponent.getAssistant(wxUser.getUserId());
-        if(assistant == null){
+        if (assistant == null) {
             throw new ServiceException("非法操作！");
         }
         DozerUtil.map(assistBaseEditReq, assistant);

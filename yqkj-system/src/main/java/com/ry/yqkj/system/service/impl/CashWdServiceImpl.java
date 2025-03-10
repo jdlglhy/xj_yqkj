@@ -135,6 +135,7 @@ public class CashWdServiceImpl extends ServiceImpl<CashWdMapper, CashWithdraw> i
         if ("SUCCESS".equals(resp.getState())) {
             cashWithdraw.setNotifyState(resp.getState());
             cashWithdraw.setStatus(TradeStatusEnum.DONE.code);
+            this.updateById(cashWithdraw);
             Fund fund = fundService.createFund(cashWithdraw.getAccountId());
             synchronized (fund) {
                 //冻结金额扣除
@@ -147,6 +148,7 @@ public class CashWdServiceImpl extends ServiceImpl<CashWdMapper, CashWithdraw> i
         if ("FAIL".equals(resp.getState()) || "CANCELLED".equals(resp.getState())) {
             cashWithdraw.setNotifyState(resp.getState());
             cashWithdraw.setStatus(TradeStatusEnum.EXPIRED.code);
+            this.updateById(cashWithdraw);
             Fund fund = fundService.createFund(cashWithdraw.getAccountId());
             synchronized (fund) {
                 //失效后冻结金额返回到可提现金额

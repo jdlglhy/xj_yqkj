@@ -11,7 +11,7 @@ import java.util.Optional;
 public enum TradeStatusEnum {
 
     PROCESSING("processing", "处理中"),
-    DONE("done", "完成"),
+    DONE("doned", "完成"),
     EXPIRED("expired", "已失效");
 
     TradeStatusEnum(String code, String message) {

@@ -33,6 +33,11 @@ public class TransferV2Request implements Serializable {
     private String outBillNo;
 
     /**
+     * 回调地址
+     */
+    @JsonProperty("notify_url")
+    private String notifyUrl;
+    /**
      * 场景
      */
     @JsonProperty("transfer_scene_id")

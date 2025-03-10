@@ -34,6 +34,10 @@ public class WxPayConfigProperties {
      */
     private String notifyUrl;
     /**
+     * 商家转账成功回调
+     */
+    private String confirmNotifyUrl;
+    /**
      * 商户证书序列号
      */
     private String serialNo;

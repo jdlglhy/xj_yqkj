@@ -58,7 +58,7 @@ public class CashWithdraw implements Serializable {
 
 
     /**
-     * 状态：processing = 处理中、done = 完成、expired = 已失效
+     * 状态：processing = 处理中、doned = 完成、expired = 已失效
      */
     private String status;
 

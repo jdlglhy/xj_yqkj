@@ -104,6 +104,7 @@ public class WxApiController extends BaseController {
         }
     }
 
+
     @Resource
     private MsgTemplateComponent msgTemplateComponent;
 
