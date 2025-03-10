@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.ry.yqkj.common.core.page.PageResDomain;
 import com.ry.yqkj.common.exception.ServiceException;
 import com.ry.yqkj.common.utils.DozerUtil;
-import com.ry.yqkj.common.utils.SecurityUtils;
 import com.ry.yqkj.common.utils.WxUserUtils;
 import com.ry.yqkj.common.utils.mp.search.SearchTool;
 import com.ry.yqkj.common.utils.uuid.SnowflakeIdUtil;
@@ -23,10 +22,12 @@ import com.ry.yqkj.system.component.AssistComponent;
 import com.ry.yqkj.system.component.WxPayComponent;
 import com.ry.yqkj.system.domain.CashWithdraw;
 import com.ry.yqkj.system.domain.Fund;
+import com.ry.yqkj.system.domain.Trade;
 import com.ry.yqkj.system.domain.WxUser;
 import com.ry.yqkj.system.mapper.CashWdMapper;
 import com.ry.yqkj.system.service.ICashWdService;
 import com.ry.yqkj.system.service.IFundService;
+import com.ry.yqkj.system.service.ITradeService;
 import com.ry.yqkj.system.service.IWxUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -57,6 +58,8 @@ public class CashWdServiceImpl extends ServiceImpl<CashWdMapper, CashWithdraw> i
     private CashWdMapper cashWdMapper;
     @Resource
     private WxPayComponent wxPayComponent;
+    @Resource
+    private ITradeService tradeService;
 
 
     @Override
@@ -89,6 +92,16 @@ public class CashWdServiceImpl extends ServiceImpl<CashWdMapper, CashWithdraw> i
         cashWithdraw.setStatus(TradeStatusEnum.PROCESSING.code);
         cashWithdraw.setAccountId(cliUserId);
         this.save(cashWithdraw);
+        Trade trade = new Trade();
+        trade.setTradeNo(ModulePreFixEnum.TRADE.code + SnowflakeIdUtil.nextId());
+        trade.setAccountId(cliUserId);
+        trade.setStatus(TradeStatusEnum.PROCESSING.code);
+        trade.setAmount(req.getAmount());
+        trade.setBizNo(cashWithdraw.getWithdrawNo());
+        trade.setRemark("用户提现");
+        trade.setType("用户提现");
+        trade.setCreateBy("用户_" + trade.getAccountId());
+        tradeService.save(trade);
         WxUser wxUser = wxUserService.getWxUserByCliUserId(cliUserId);
         //调用 商家转账到零钱接口
         TransferBalanceResp resp = wxPayComponent.transferToBalance(wxUser.getOpenId(), cashWithdraw.getWithdrawNo(), cashWithdraw.getAmount(), "用户提现");
@@ -98,7 +111,7 @@ public class CashWdServiceImpl extends ServiceImpl<CashWdMapper, CashWithdraw> i
         this.updateById(cashWithdraw);
         log.info("商家转账到零钱接口返回结果：cliUserId={},resp={}", cliUserId, resp);
         if (StringUtils.isBlank(resp.getPackageInfo())) {
-            log.error("调用商家转账接口失败：{}",JSON.toJSONString(resp));
+            log.error("调用商家转账接口失败：{}", JSON.toJSONString(resp));
             throw new ServiceException("提现失败！");
         }
         return resp;
@@ -143,6 +156,12 @@ public class CashWdServiceImpl extends ServiceImpl<CashWdMapper, CashWithdraw> i
                 fund.setTotalAmount(fund.getWithdrawAmount().add(fund.getFreezeAmount()));
                 fundService.updateById(fund);
             }
+            //生成交易记录
+            Trade trade = tradeService.getByBizNo(cashWithdraw.getWithdrawNo());
+            trade.setStatus(TradeStatusEnum.DONE.code);
+            trade.setAmount(cashWithdraw.getAmount());
+            trade.setModifyBy("wx回调_" + trade.getAccountId());
+            tradeService.updateById(trade);
             return;
         }
         if ("FAIL".equals(resp.getState()) || "CANCELLED".equals(resp.getState())) {

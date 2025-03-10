@@ -116,27 +116,27 @@ public class WxApiController extends BaseController {
 //        return R.ok();
 //    }
 //
-    @PostMapping("/transfer")
-    @ApiOperation("转账测试")
-    public R<Void> testTransfer() throws Exception {
-        TransferBalanceResp transferBalanceResp = wxPayComponent.transferToBalance("otQEg7eeTizl9qZG3NMgnrEh5XhI", NonceUtil.createNonce(16), new BigDecimal("0.1"), "转账test");
-        logger.info("resp={}", transferBalanceResp);
-        return R.ok();
-    }
-
-    @GetMapping("/url_link")
-    @ApiOperation("生成小程序urlLink")
-    public R<String> generateUrlLink() {
-        return R.ok(wxCommonComponent.generateUrlLink());
-    }
-
-
-
-    @GetMapping("/send_msg")
-    @ApiOperation("发送短息")
-    public R<Void> sendMsg() {
-        ServiceOrder serviceOrder = serviceOrderService.getById(1899056138505207810L);
-        msgTemplateComponent.sendNewOrderSmsMsg(serviceOrder);
-        return R.ok();
-    }
+//    @PostMapping("/transfer")
+//    @ApiOperation("转账测试")
+//    public R<Void> testTransfer() throws Exception {
+//        TransferBalanceResp transferBalanceResp = wxPayComponent.transferToBalance("otQEg7eeTizl9qZG3NMgnrEh5XhI", NonceUtil.createNonce(16), new BigDecimal("0.1"), "转账test");
+//        logger.info("resp={}", transferBalanceResp);
+//        return R.ok();
+//    }
+//
+//    @GetMapping("/url_link")
+//    @ApiOperation("生成小程序urlLink")
+//    public R<String> generateUrlLink() {
+//        return R.ok(wxCommonComponent.generateUrlLink());
+//    }
+//
+//
+//
+//    @GetMapping("/send_msg")
+//    @ApiOperation("发送短息")
+//    public R<Void> sendMsg() {
+//        ServiceOrder serviceOrder = serviceOrderService.getById(1899056138505207810L);
+//        msgTemplateComponent.sendNewOrderSmsMsg(serviceOrder);
+//        return R.ok();
+//    }
 }
