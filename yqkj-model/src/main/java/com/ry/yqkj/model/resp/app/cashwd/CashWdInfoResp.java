@@ -31,11 +31,6 @@ public class CashWdInfoResp implements Serializable {
     private String withdrawNo;
 
     /**
-     * 外部账单号
-     */
-    private String outBillNo;
-
-    /**
      * 用户ID
      */
     private Long accountId;
@@ -44,6 +39,11 @@ public class CashWdInfoResp implements Serializable {
      * 提现金额
      */
     private BigDecimal amount;
+
+    /**
+     * 外部转账单号
+     */
+    private String transferBillNo;
 
 
     /**

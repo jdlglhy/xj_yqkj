@@ -4,6 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
@@ -20,9 +21,9 @@ import java.util.List;
 @Data
 public class AssistBaseEditReq implements Serializable {
 
-    @ApiModelProperty(value = "助教ID", required = false)
-    @NotNull(message = "助教ID必填")
-    private Long assistId;
+//    @ApiModelProperty(value = "助教ID", required = false)
+//    @NotNull(message = "助教ID必填")
+//    private Long assistId;
     /**
      * 昵称
      */
@@ -31,10 +32,9 @@ public class AssistBaseEditReq implements Serializable {
     private String nickName;
     /**
      * 费用
-     */
     @ApiModelProperty(value = "费用", required = false, example = "58、68、78、88、98", notes = "单位：元/小时")
     @NotNull(message = "请设置费用")
-    private BigDecimal price = BigDecimal.valueOf(0.01);
+    private BigDecimal price = BigDecimal.valueOf(0.01);*/
     /**
      * 生活照
      */
@@ -89,5 +89,6 @@ public class AssistBaseEditReq implements Serializable {
      * 个性签名
      */
     @ApiModelProperty(value = "个性签名", required = false)
+    @Length(max = 50)
     private String perSign;
 }

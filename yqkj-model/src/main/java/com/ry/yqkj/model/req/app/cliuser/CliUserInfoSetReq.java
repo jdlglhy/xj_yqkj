@@ -32,27 +32,27 @@ public class CliUserInfoSetReq implements Serializable {
     @ApiModelProperty(value = "头像",required = false)
     private String avatar;
 
-    /**
-     * phone
-     */
-    @ApiModelProperty(value = "手机号",required = false)
-    @Length(min = 2,max = 16)
-    private String phone;
-
-    /**
-     * 性别
-     */
-    @ApiModelProperty(value = "性别",required = false)
-    @Min(0)
-    @Max(1)
-    private Integer gender;
-
-    /**
-     * 个人简介
-     */
-    @ApiModelProperty(value = "个人简介",required = false)
-    @Length(min = 1,max = 50)
-    private String profile;
+//    /**
+//     * phone
+//     */
+//    @ApiModelProperty(value = "手机号",required = false)
+//    @Length(min = 2,max = 16)
+//    private String phone;
+//
+//    /**
+//     * 性别
+//     */
+//    @ApiModelProperty(value = "性别",required = false)
+//    @Min(0)
+//    @Max(1)
+//    private Integer gender;
+//
+//    /**
+//     * 个人简介
+//     */
+//    @ApiModelProperty(value = "个人简介",required = false)
+//    @Length(min = 1,max = 50)
+//    private String profile;
 
 
 

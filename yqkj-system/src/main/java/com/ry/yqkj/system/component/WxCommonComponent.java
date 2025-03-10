@@ -48,6 +48,7 @@ public class WxCommonComponent {
                 wxUser.setPhone(phone);
                 wxUserService.updateById(wxUser);
             }
+            return phone;
         } catch (Exception e) {
             log.error("获取手机号失败:encryptedData={},iv={}", encryptedData, iv, e);
         }

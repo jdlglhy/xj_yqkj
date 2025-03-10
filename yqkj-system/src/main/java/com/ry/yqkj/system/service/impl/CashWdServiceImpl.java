@@ -75,8 +75,9 @@ public class CashWdServiceImpl extends ServiceImpl<CashWdMapper, CashWithdraw> i
         synchronized (fund) {
             //每次提现会将可提现金额转入到冻结金额
             fund.setWithdrawAmount(fund.getWithdrawAmount().subtract(req.getAmount()));
+            fund.setFreezeAmount(fund.getFreezeAmount().add(req.getAmount()));
             fund.setTotalAmount(fund.getTotalAmount().subtract(req.getAmount()));
-            fund.setModifyBy("系统_" + SecurityUtils.getUserId());
+            fund.setModifyBy("系统_" + cliUserId);
             fund.setModifyTime(new Date());
             fundService.updateById(fund);
         }
@@ -97,6 +98,7 @@ public class CashWdServiceImpl extends ServiceImpl<CashWdMapper, CashWithdraw> i
         this.updateById(cashWithdraw);
         log.info("商家转账到零钱接口返回结果：cliUserId={},resp={}", cliUserId, resp);
         if (StringUtils.isBlank(resp.getPackageInfo())) {
+            log.error("调用商家转账接口失败：{}",JSON.toJSONString(resp));
             throw new ServiceException("提现失败！");
         }
         return resp;

@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.Length;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -58,6 +59,7 @@ public class AssistApplyReq implements Serializable {
      */
     @ApiModelProperty(value = "生活照（最多6张）", required = true)
     @NotEmpty(message = "请上传生活照")
+    @Size(min = 3,max =6,message = "生活照至少上传3张，最多6张")
     private List<String> lifePhotos;
     /**
      * 头像

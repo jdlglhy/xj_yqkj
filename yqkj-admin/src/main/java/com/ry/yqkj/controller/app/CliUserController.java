@@ -11,11 +11,14 @@ import com.ry.yqkj.system.component.AssistComponent;
 import com.ry.yqkj.system.domain.Assistant;
 import com.ry.yqkj.system.domain.CliUser;
 import com.ry.yqkj.system.domain.Fund;
+import com.ry.yqkj.system.domain.WxUser;
 import com.ry.yqkj.system.service.ICliUserAuthService;
 import com.ry.yqkj.system.service.ICliUserService;
 import com.ry.yqkj.system.service.IFundService;
+import com.ry.yqkj.system.service.IWxUserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -42,6 +45,8 @@ public class CliUserController extends WxBaseController {
     private ICliUserAuthService cliUserAuthService;
     @Resource
     private IFundService fundService;
+    @Resource
+    private IWxUserService wxUserService;
 
 
     @PostMapping("/cli_user/set_simple_info")
@@ -58,14 +63,18 @@ public class CliUserController extends WxBaseController {
         CliUser cliUser = cliUserService.getById(wxAppUser.getUserId());
         CliUserInfoResp cliUserInfoResp = DozerUtil.map(cliUser, CliUserInfoResp.class);
         Assistant assistant = assistComponent.getAssistant(cliUser.getId());
-        if (assistant != null) {
-            cliUserInfoResp.setAssistId(assistant.getId());
-            //如果是助教、获取助教账户信息
-            Fund fund = fundService.createFund(assistant.getId());
-            cliUserInfoResp.setFreezeAmount(fund.getFreezeAmount());
-            cliUserInfoResp.setTotalAmount(fund.getTotalAmount());
-            cliUserInfoResp.setWithdrawAmount(fund.getWithdrawAmount());
+        cliUserInfoResp.setAssistId(assistant != null ? assistant.getId():null);
+        //如果是助教、获取助教账户信息
+        Fund fund = fundService.createFund(cliUser.getId());
+        cliUserInfoResp.setFreezeAmount(fund.getFreezeAmount());
+        cliUserInfoResp.setTotalAmount(fund.getTotalAmount());
+        cliUserInfoResp.setWithdrawAmount(fund.getWithdrawAmount());
+        String tel = cliUser.getPhone();
+        if (StringUtils.isNoneBlank(tel)) {
+            WxUser wxUser = wxUserService.getById(cliUser.getWxUserId());
+            tel = wxUser.getPhone();
         }
+        cliUserInfoResp.setTel(tel);
         return R.ok(cliUserInfoResp);
     }
 

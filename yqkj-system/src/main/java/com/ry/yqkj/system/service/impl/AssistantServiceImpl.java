@@ -26,10 +26,12 @@ import com.ry.yqkj.model.resp.app.assist.AssistDetailResp;
 import com.ry.yqkj.model.resp.app.assist.AssistFormInfoResp;
 import com.ry.yqkj.model.resp.app.assist.AssistInfoResp;
 import com.ry.yqkj.model.resp.web.assist.WebAssistInfoResp;
+import com.ry.yqkj.system.component.AssistComponent;
 import com.ry.yqkj.system.domain.AssistForm;
 import com.ry.yqkj.system.domain.Assistant;
 import com.ry.yqkj.system.domain.CliUser;
 import com.ry.yqkj.system.domain.CliUserAuth;
+import com.ry.yqkj.system.domain.WxUser;
 import com.ry.yqkj.system.mapper.app.AssistFormMapper;
 import com.ry.yqkj.system.mapper.app.AssistantMapper;
 import com.ry.yqkj.system.service.IAssistantService;
@@ -63,6 +65,8 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
     private ICliUserService cliUserService;
     @Resource
     private ICliUserAuthService cliUserAuthService;
+    @Resource
+    private AssistComponent assistComponent;
 
 
     @Override
@@ -197,6 +201,8 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
     public PageResDomain<AssistInfoResp> assistPage(AssistPageReq assistPageReq) {
         Page<Assistant> page = new Page<>(assistPageReq.getCurrent(), assistPageReq.getPageSize());
         QueryWrapper<Assistant> queryWrapper = SearchTool.invoke(assistPageReq);
+        Assistant assistant = assistComponent.currentUserToAssistant();
+        queryWrapper.lambda().ne(assistant != null,Assistant::getId,assistant.getId());
         page = assistantMapper.selectPage(page, queryWrapper);
         return PageResDomain.parse(page, AssistInfoResp.class);
     }
@@ -222,12 +228,11 @@ public class AssistantServiceImpl extends ServiceImpl<AssistantMapper, Assistant
 
     @Override
     public void assistBaseEdit(AssistBaseEditReq assistBaseEditReq) {
-        Assistant assistant = assistantMapper.selectById(assistBaseEditReq.getAssistId());
-        if (assistant == null) {
-            throw new ServiceException("未获取到助教信息！");
-        }
-        if (ObjectUtils.notEqual(WxUserUtils.current().getUserId(), assistant.getCliUserId())) {
-            throw new ServiceException("无法修改！");
+
+        WxAppUser wxUser = WxUserUtils.current();
+        Assistant assistant = assistComponent.getAssistant(wxUser.getUserId());
+        if(assistant == null){
+            throw new ServiceException("非法操作！");
         }
         DozerUtil.map(assistBaseEditReq, assistant);
         assistant.setLifePhoto(StringUtils.join(assistBaseEditReq.getLifePhotos(), ","));
